@@ -17,30 +17,39 @@ import { useDispatch, useSelector } from 'react-redux';
 import { register } from '../../features/authSlice'; 
 import LoaderModal from '../../components/common/LoaderModel';
 const SignUpScreen = () => {
+  // Initialize state variables for name, email, password, confirmPassword, errorMessage
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
-  
+
+  // Get navigation object to handle screen transitions
   const navigation = useNavigation();
 
+// Initialize dispatch for triggering actions and selector for accessing state
   const dispatch = useDispatch();
   const { loading, error } = useSelector((state) => state.auth);
+
+  // Reset error message whenever any input field changes
   useEffect(() => {
     setErrorMessage('');
   }, [name, email, password, confirmPassword]);
 
+  // Function to handle input changes and reset error message
   const handleInputChange = (setter) => (value) => {
     setter(value);
     setErrorMessage('');
   };
   console.log({ loading, error },"45")
+
   const handleSignUp = async () => {
+     // Check if passwords match
     if (password !== confirmPassword) {
       setErrorMessage('Passwords do not match.');
       return;
     }
+      // Check if all fields are filled
   
     if (!name || !email || !password) {
       setErrorMessage('Please fill in all fields.');
@@ -69,10 +78,13 @@ const SignUpScreen = () => {
       setErrorMessage('An error occurred. Please try again.');
     }
   };
+
+  // Function to navigate to the Login screen
   const handleLogin = () => {
     navigation.navigate('Login');
   };
 
+  // Render StatusBar, SafeAreaView, ScrollView, Input fields, Error Message, Sign Up button, and Login link
   return (
     <>
       <StatusBar backgroundColor="#4a90e2" barStyle="light-content" />
