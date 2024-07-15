@@ -48,68 +48,22 @@ const LoginScreen = () => {
       setLoaderMessage('');
     }
   }, [loading, error]);
+
+
+  
   const handleSignIn = () => {
     if (!email || !password) {
       alert('Please enter both email and password.');
       return;
     }
 
-    // setLoaderStatus('loading');
-    // setLoaderMessage('Please wait...\nYou will be directed to the homepage soon.');
+   
 
     dispatch(loginUser({ email, password }))
    
-      // .then((response) => {
-      //   // console.log(response,"12")
-      //   // setLoaderStatus('success');
-      //   // setLoaderMessage('Login successful! You will be directed to the homepage soon.');
-
-      //   // setTimeout(() => {
-      //   //   setLoaderStatus(null);
-      //   //   setLoaderMessage('');
-      //   //   navigation.navigate('RoleSelection'); // Navigate to the homepage
-      //   // }, 2000);
-      // })
-      // .catch((error) => {
-      //   setLoaderStatus('failure');
-      //   setLoaderMessage(error.message || 'Login failed. Please try again.');
-      //   setTimeout(() => {
-      //     setLoaderStatus(null);
-      //     setLoaderMessage('');
-      //   }, 2000);
-      // });
+     
   };
-  // const handleSignIn = async () => {
-  //   setLoaderStatus('loading');
-  //   setLoaderMessage('Please wait...\nYou will be directed to the homepage soon.');
-
-  //   setTimeout(async () => {
-  //     const users = JSON.parse(await AsyncStorage.getItem('users'));
-  //     const user = users.find(
-  //       (u) => u.email === email && u.password === password
-  //     );
-
-  //     if (user) {
-  //       await AsyncStorage.setItem('userToken', 'exampleToken'); // Save user token
-  //       setLoaderStatus('success');
-  //       setLoaderMessage('Login successful! You will be directed to the homepage soon.');
-        
-  //       setTimeout(() => {
-  //         setLoaderStatus(null);
-  //         setLoaderMessage('');
-  //         dispatch(login({ username: user.name }));
-  //         navigation.navigate('RoleSelection'); // Navigate to the homepage
-  //       }, 2000);
-  //     } else {
-  //       setLoaderStatus('failure');
-  //       setLoaderMessage('Invalid email or password.');
-  //       setTimeout(() => {
-  //         setLoaderStatus(null);
-  //         setLoaderMessage('');
-  //       }, 2000);
-  //     }
-  //   }, 3000);
-  // };
+  
 
 
 

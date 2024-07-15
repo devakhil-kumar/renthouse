@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { View, StatusBar, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -8,11 +8,9 @@ import CollectionScreen from '../../screens/collection/CollectionScreen';
 import MyPropertyScreen from '../../screens/myProperty/MyPropertyScreen';
 import NotificationScreen from '../../screens/notification/NotificationScreen';
 import ProfileScreen from '../../screens/profile/ProfileScreen';
-import { useNavigation } from '@react-navigation/native';
-import { useNavigationState } from '@react-navigation/native';
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import { useDispatch } from 'react-redux';
-import { logout } from '../../features/authSlice';
+// import { logout } from '../../features/authSlice';
 import RenterProfile from '../../screens/profile/RenterProfile';
 import ApartmentScreen from '../../screens/myProperty/ApartmentScreen';
 import AddPropertyStep1 from '../../screens/myProperty/AddPropertyStep1';
@@ -26,13 +24,13 @@ const MyPropertyStack = createStackNavigator();
 const NotificationStack = createStackNavigator();
 const ProfileStack = createStackNavigator();
 
-const CustomHeader = ({ logoutHandler, title }) => (
+const CustomHeader = ({ navigation, title }) => (
   <View style={styles.headerContainer}>
     <View style={styles.headerContent}>
       <Text style={styles.headerTitle}>{title}</Text>
-      <TouchableOpacity onPress={logoutHandler} style={styles.logoutButton}>
-        <Text style={styles.logoutButtonText}>Logout</Text>
-      </TouchableOpacity>
+      {/* <TouchableOpacity onPress={() => navigation.navigate('Notification')} style={styles.notificationButton}>
+        <Icon name="notifications-outline" size={24} color="#fff" />
+      </TouchableOpacity> */}
     </View>
     <Text style={styles.subHeaderText}>
       This is a ten word subheader text for demonstration purposes
@@ -40,50 +38,44 @@ const CustomHeader = ({ logoutHandler, title }) => (
   </View>
 );
 
-const SearchStackScreen = ({ logoutHandler }) => (
+const SearchStackScreen = () => (
   <SearchStack.Navigator>
     <SearchStack.Screen 
       name="Searchstack" 
       component={SearchScreen} 
-      options={{
-        header: ({ navigation, route, options }) => (
-          <CustomHeader logoutHandler={logoutHandler} title="Search" />
-        ),
+      options={({ navigation }) => ({
+        header: () => <CustomHeader navigation={navigation} title="Home" />,
         headerStyle: { backgroundColor: '#4a90e2' },
         headerTintColor: 'white',
-      }}
+      })}
     />
   </SearchStack.Navigator>
 );
 
-const CollectionStackScreen = ({ logoutHandler }) => (
+const CollectionStackScreen = () => (
   <CollectionStack.Navigator>
     <CollectionStack.Screen 
       name="Collectionstack" 
       component={CollectionScreen} 
-      options={{
-        header: ({ navigation, route, options }) => (
-          <CustomHeader logoutHandler={logoutHandler} title="Collection" />
-        ),
+      options={({ navigation }) => ({
+        header: () => <CustomHeader navigation={navigation} title="Collection" />,
         headerStyle: { backgroundColor: '#4a90e2' },
         headerTintColor: 'white',
-      }}
+      })}
     />
   </CollectionStack.Navigator>
 );
 
-const MyPropertyStackScreen = ({ logoutHandler }) => (
+const MyPropertyStackScreen = () => (
   <MyPropertyStack.Navigator>
     <MyPropertyStack.Screen 
       name="MyPropertystack" 
       component={MyPropertyScreen} 
-      options={{
-        header: ({ navigation, route, options }) => (
-          <CustomHeader logoutHandler={logoutHandler} title="My Property" />
-        ),
+      options={({ navigation }) => ({
+        header: () => <CustomHeader navigation={navigation} title="My Property" />,
         headerStyle: { backgroundColor: '#4a90e2' },
         headerTintColor: 'white',
-      }}
+      })}
     />
     <MyPropertyStack.Screen 
       name="ApartmentScreen" 
@@ -115,34 +107,30 @@ const MyPropertyStackScreen = ({ logoutHandler }) => (
   </MyPropertyStack.Navigator>
 );
 
-const NotificationStackScreen = ({ logoutHandler }) => (
+const NotificationStackScreen = () => (
   <NotificationStack.Navigator>
     <NotificationStack.Screen 
       name="Notificationstack" 
       component={NotificationScreen}  
-      options={{
-        header: ({ navigation, route, options }) => (
-          <CustomHeader logoutHandler={logoutHandler} title="Notification" />
-        ),
+      options={({ navigation }) => ({
+        header: () => <CustomHeader navigation={navigation} title="Notification" />,
         headerStyle: { backgroundColor: '#4a90e2' },
         headerTintColor: 'white',
-      }}
+      })}
     />
   </NotificationStack.Navigator>
 );
 
-const ProfileStackScreen = ({ logoutHandler }) => (
+const ProfileStackScreen = () => (
   <ProfileStack.Navigator>
     <ProfileStack.Screen 
       name="Profilestack" 
       component={ProfileScreen}  
-      options={{
-        header: ({ navigation, route, options }) => (
-          <CustomHeader logoutHandler={logoutHandler} title="Profile" />
-        ),
+      options={({ navigation }) => ({
+        header: () => <CustomHeader navigation={navigation} title="Profile" />,
         headerStyle: { backgroundColor: '#4a90e2' },
         headerTintColor: 'white',
-      }}
+      })}
     />
     <ProfileStack.Screen 
       name="RenterProfile" 
@@ -157,7 +145,7 @@ const ProfileStackScreen = ({ logoutHandler }) => (
 );
 
 const TabNavigator = () => {
-  const dispatch = useDispatch();
+  // const dispatch = useDispatch();
 
   const getTabBarVisibility = (route) => {
     const routeName = getFocusedRouteNameFromRoute(route) ?? 'MyPropertystack';
@@ -167,9 +155,9 @@ const TabNavigator = () => {
     return true;
   };
 
-  const logoutHandler = () => {
-    dispatch(logout());
-  };
+  // const logoutHandler = () => {
+  //   dispatch(logout());
+  // };
 
   return (
     <Tab.Navigator
@@ -179,33 +167,32 @@ const TabNavigator = () => {
       }}
     >
       <Tab.Screen
-        name="Search"
+        name="Home"
+        component={SearchStackScreen}
         options={{
           headerShown: false,
           tabBarIcon: ({ color, size }) => (
-            <Icon name="search-outline" size={size} color={color} />
+            <Icon name="home-outline" size={size} color={color} />
           )
         }}
-      >
-        {() => <SearchStackScreen logoutHandler={logoutHandler} />}
-      </Tab.Screen>
+      />
       <Tab.Screen
         name="Collection"
+        component={CollectionStackScreen}
         options={{
           headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <Icon name="bookmark-outline" size={size} color={color} />
           )
         }}
-      >
-        {() => <CollectionStackScreen logoutHandler={logoutHandler} />}
-      </Tab.Screen>
+      />
       <Tab.Screen
         name="MyProperty"
+        component={MyPropertyStackScreen}
         options={({ route }) => ({
           headerShown: false,
           tabBarIcon: ({ color, size }) => (
-            <Icon name="home-outline" size={size} color={color} />
+            <Icon name="business-outline" size={size} color={color} />
           ),
           tabBarStyle: ((route) => {
             const routeName = getFocusedRouteNameFromRoute(route) ?? "MyPropertystack";
@@ -216,31 +203,27 @@ const TabNavigator = () => {
           })(route),
           tabBarVisible: getTabBarVisibility(route)
         })}
-      >
-        {() => <MyPropertyStackScreen logoutHandler={logoutHandler} />}
-      </Tab.Screen>
+      />
       <Tab.Screen
         name="Notification"
+        component={NotificationStackScreen}
         options={{
           headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <Icon name="notifications-outline" size={size} color={color} />
           )
         }}
-      >
-        {() => <NotificationStackScreen logoutHandler={logoutHandler} />}
-      </Tab.Screen>
+      />
       <Tab.Screen
         name="Profile"
+        component={ProfileStackScreen}
         options={{
           headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <Icon name="person-outline" size={size} color={color} />
           )
         }}
-      >
-        {() => <ProfileStackScreen logoutHandler={logoutHandler} />}
-      </Tab.Screen>
+      />
     </Tab.Navigator>
   );
 };
@@ -267,15 +250,9 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 13,
   },
-  logoutButton: {
+  notificationButton: {
     marginRight: 10,
     padding: 10,
-    backgroundColor: '#fff',
-    borderRadius: 5,
-  },
-  logoutButtonText: {
-    color: '#4a90e2',
-    fontWeight: 'bold',
   },
 });
 
