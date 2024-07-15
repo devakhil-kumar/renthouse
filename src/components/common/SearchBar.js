@@ -4,25 +4,28 @@ import { View, TextInput, TouchableOpacity, StyleSheet, useColorScheme } from 'r
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { lightTheme, darkTheme } from './theme';
 
-const SearchBar = () => {
+const SearchBar = ({ onPress }) => {
   const colorScheme = useColorScheme();
   const theme = colorScheme === 'dark' ? darkTheme : lightTheme;
 
   return (
     <View style={styles.container}>
-      <View style={[styles.searchContainer, { backgroundColor: theme.colors.secondary }]}>
+      <TouchableOpacity 
+        style={[styles.searchContainer, { backgroundColor: theme.colors.secondary }]}
+        onPress={onPress}
+      >
         <Icon name="search" size={24} color={theme.colors.text} style={styles.searchIcon} />
         <TextInput
           style={[styles.input, { color: theme.colors.text }]}
           placeholder="Search by Address, City, or ZIP"
           placeholderTextColor={theme.colors.text}
+          editable={false}
         />
         <TouchableOpacity>
           <Icon name="close" size={24} color={theme.colors.text} />
         </TouchableOpacity>
-      </View>
+      </TouchableOpacity>
       <TouchableOpacity style={[styles.filterButton, { backgroundColor: theme.colors.primary }]}>
-        {/* <Ionicons name="options" size={24} color={theme.colors.background} /> */}
         <Icon name="tune" size={24} color={theme.colors.background} />
       </TouchableOpacity>
     </View>

@@ -15,6 +15,7 @@ import RenterProfile from '../../screens/profile/RenterProfile';
 import ApartmentScreen from '../../screens/myProperty/ApartmentScreen';
 import AddPropertyStep1 from '../../screens/myProperty/AddPropertyStep1';
 import AddPropertyStep2 from '../../screens/myProperty/AddPropertyStep2';
+import SearchProperties from '../../screens/search/SearchProperties';
 
 const Tab = createBottomTabNavigator();
 
@@ -49,6 +50,16 @@ const SearchStackScreen = () => (
         headerTintColor: 'white',
       })}
     />
+     <SearchStack.Screen 
+      name="Searchproperties" 
+      component={SearchProperties} 
+      options={{
+        headerTitle: "Search Properties",
+        headerStyle: { backgroundColor: '#4a90e2', height: 100 },
+        headerTintColor: 'white',
+      }} 
+    />
+    
   </SearchStack.Navigator>
 );
 
