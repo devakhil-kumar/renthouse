@@ -1,11 +1,20 @@
 import React, { useState, useRef } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
-
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { sendOTP, reset } from '../../features/otpSlice';
 const OTPScreen = () => {
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [error, setError] = useState('');
   const inputRefs = useRef([]);
-
+  const navigation = useNavigation();
+  const dispatch = useDispatch();
+  const route = useRoute();
+  const { email, otp: routeOtp, id } = route.params; 
+  console.log(id)
+  const { loading, error: apiError, success, email: otpEmail, otp: apiOtp} = useSelector((state) => state.forgotPassword);
+// console.log(apiOtp)
+// console.log({routeOtp})
   const handleOtpChange = (value, index) => {
     const newOtp = [...otp];
     newOtp[index] = value;
@@ -27,19 +36,26 @@ const OTPScreen = () => {
     }
   };
 
-  const handleProceed = () => {
-    if (otp.join('').length === 6) {
-      // Validate OTP here
-      setError('The OTP you entered is incorrect, please check again or resend it now.');
+   const handleProceed = () => {
+    console.log(otp.join('') === routeOtp)
+    if (otp.join('') == routeOtp) {
+      navigation.navigate('resetpassword', { id }); // Replace 'NextScreen' with your next screen's name
     } else {
-      setError('Please enter the 6 digit verification code.');
+      setError('The OTP you entered is incorrect, please check again or resend it now.');
     }
   };
 
-  const handleResend = () => {
-    // Implement resend logic here
-    setOtp(['', '', '', '', '', '']);
-    setError('');
+  const handleResend = async () => {
+    try {
+      // Dispatch action to resend OTP
+      
+      await dispatch(sendOTP( email ));
+      // Clear OTP input fields
+      setOtp(['', '', '', '', '', '']);
+      setError('');
+    } catch (error) {
+      setError('Failed to resend OTP. Please try again.');
+    }
   };
 
   return (

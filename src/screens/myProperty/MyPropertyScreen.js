@@ -1,34 +1,53 @@
-import {  View, ScrollView, StyleSheet, useColorScheme, SafeAreaView , TouchableOpacity, Text } from 'react-native'
-import React from 'react'
-import Header from '../../components/common/Header'
-import RecentListings from '../../components/common/RecentListings'
-import RecentReviews from '../../components/common/RecentReviews'
-import CategoryTabs from '../../components/common/CategoryTabs'
-import { lightTheme, darkTheme } from '../../components/common/theme';
-import { useNavigation } from '@react-navigation/native';
+import React, {useState} from 'react';
+import {
+  View,
+  ScrollView,
+  StyleSheet,
+  useColorScheme,
+  SafeAreaView,
+  TouchableOpacity,
+  Text,
+} from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import Header from '../../components/common/Header';
+import RecentListings from '../../components/common/RecentListings';
+import RecentReviews from '../../components/common/RecentReviews';
+import CategoryTabs from '../../components/common/CategoryTabs';
+import {lightTheme, darkTheme} from '../../components/common/theme';
+import {useNavigation} from '@react-navigation/native';
+
 const MyPropertyScreen = () => {
   const navigation = useNavigation();
   const colorScheme = useColorScheme();
   const theme = colorScheme === 'dark' ? darkTheme : lightTheme;
+  const [activeTab, setActiveTab] = useState('Listing');
+
   const handleAddPropertyPress = () => {
-    navigation.navigate('AddPropertyScreen'); // replace 'AddPropertyScreen' with your actual screen name
+    navigation.navigate('AddPropertyScreen');
   };
+
+  const handleTabPress = tabName => {
+    setActiveTab(tabName);
+  };
+
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <SafeAreaView
+      style={[styles.container, {backgroundColor: theme.colors.background}]}>
+      <CategoryTabs activeTab={activeTab} onTabPress={handleTabPress} />
       <ScrollView>
-        {/* <Header/> */}
-        <CategoryTabs />
-        <RecentReviews />
-        <RecentListings />
+        {activeTab === 'Listing' ? <RecentListings /> : <RecentReviews />}
       </ScrollView>
-      <TouchableOpacity style={styles.addButton} onPress={handleAddPropertyPress}>
-        <Text style={styles.addButtonText}>LIST PROPERTY</Text>
+      <TouchableOpacity
+        style={styles.addButton}
+        onPress={handleAddPropertyPress}>
+        {/* <Text style={styles.addButtonText}>LIST PROPERTY</Text> */}
+        <Icon name="add" size={30} color="#fff" />
       </TouchableOpacity>
     </SafeAreaView>
-  )
-}
+  );
+};
 
-export default MyPropertyScreen
+export default MyPropertyScreen;
 
 const styles = StyleSheet.create({
   container: {
@@ -38,18 +57,18 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 20,
     right: 20,
-    width: 130,
+    width: 50,
     height: 50,
-   
     borderRadius: 25,
-    backgroundColor: '#4A90E2', // Change this color to match your theme
+    // backgroundColor: 'rgba(74, 144, 226, 0.8)', // Updated to make the button semi-transparent
+    backgroundColor: '#4A90E2',
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 3, // Add shadow for Android
-    shadowColor: '#000', // Add shadow for iOS
-    shadowOffset: { width: 0, height: 2 }, // Add shadow for iOS
-    shadowOpacity: 0.8, // Add shadow for iOS
-    shadowRadius: 2, // Add shadow for iOS
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: {width: 8, height: 8},
+    shadowOpacity: 0.9,
+    shadowRadius: 2,
   },
   addButtonText: {
     color: '#fff',

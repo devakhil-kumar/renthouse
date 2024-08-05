@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { loginService, registerService,updateService } from '../api/service'; // Adjust path based on your project structure
+import { loginService, registerService,updateService,getUserDetailService } from '../api/service'; // Adjust path based on your project structure
 
 // Async thunk for logging in
 export const loginUser = createAsyncThunk(
@@ -41,38 +41,31 @@ export const updateUser = createAsyncThunk(
     console.log({ userData,ID})
     try {
       const response = await updateService(userData,ID);
-      await AsyncStorage.setItem('user', JSON.stringify(response.admin)); // Update user in AsyncStorage
-      console.log(response,"updated")
+      await AsyncStorage.setItem('user', JSON.stringify(response.user)); // Update user in AsyncStorage
+      await AsyncStorage.setItem('userRole', JSON.stringify(response.user?.role||null));
+      console.log(response,"updatedfghdfghdfghdfg")
       return response; // Return updated user data to update state
     } catch (error) {
+      console.log({error})
       return rejectWithValue(error.message);
-      console.log(error)
+    
     }
   }
 );
-// export const loadInitialState = () => async (dispatch) => {
-//   try {
-//     const token = await AsyncStorage.getItem('token');
-//     const userString = await AsyncStorage.getItem('user');
-//     const userRoleString = await AsyncStorage.getItem('userRole');
 
-//     const user = userString ? JSON.parse(userString) : null;
-//     const userRole = userRoleString ? JSON.parse(userRoleString) : null;
+export const fetchUserDetails = createAsyncThunk(
+  'auth/fetchUserDetails',
+  async (ID, { rejectWithValue }) => {
+    try {
+      await AsyncStorage.setItem('user', JSON.stringify(response.admin));
+      const response = await getUserDetailService(ID);
+      return response; // Return user details to update state
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
 
-//     dispatch(initializeState({
-//       isLoggedIn: !!token,
-//       user,
-//       userRole,
-//     }));
-//   } catch (error) {
-//     console.error('Failed to load initial state:', error);
-//     dispatch(initializeState({
-//       isLoggedIn: false,
-//       user: null,
-//       userRole: null,
-//     }));
-//   }
-// };
 export const loadInitialState = createAsyncThunk(
   'auth/loadInitialState',
   async () => {
@@ -82,9 +75,9 @@ export const loadInitialState = createAsyncThunk(
       const isLoggedInn = await AsyncStorage.getItem('token');
       console.log("UserRole:", userRole);
       console.log("isLoggedIn:", isLoggedInn);
-      
+      const parsedUserRole = userRole ? JSON.parse(userRole) : null;
       return {
-        userRole: userRole ? userRole: null,
+        userRole: parsedUserRole,
         isLoggedIn: isLoggedInn ? true : false,
       };
     } catch (error) {
@@ -101,6 +94,7 @@ const initialState = {
   loading: false,
   error: null,
 };
+
 
 const authSlice = createSlice({
   name: 'auth',
@@ -182,13 +176,26 @@ const authSlice = createSlice({
     });
     builder.addCase(updateUser.fulfilled, (state, action) => {
       state.user = action.payload.admin;
-      state.userRole=action.payload.admin?.role
+      state.userRole=action.payload.user?.role
       state.loading = false;
       state.error = null;
     });
     builder.addCase(updateUser.rejected, (state, action) => {
       state.loading = false;
       state.error = action.payload || 'Update failed. Please try again.';
+    });
+    builder.addCase(fetchUserDetails.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    });
+    builder.addCase(fetchUserDetails.fulfilled, (state, action) => {
+      state.user = action.payload; // Assuming the API returns user details
+      state.loading = false;
+      state.error = null;
+    });
+    builder.addCase(fetchUserDetails.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload || 'Failed to fetch user details.';
     });
   },
 });

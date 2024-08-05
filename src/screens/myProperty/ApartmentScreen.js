@@ -17,10 +17,10 @@ const ApartmentScreen = ({ route }) => {
 const DescriptionTab = ({ listing }) => {
   const { colors } = useTheme();
   const propertyDetails = [
-    { icon: 'resize', value: '1,225', label: 'sqft' },
-    { icon: 'bed-empty', value: '3.0', label: 'Bedrooms' },
-    { icon: 'shower', value: '1.0', label: 'Bathrooms' },
-    { icon: 'shield-check', value: '4,457', label: 'Safety Rank' },
+    { icon: 'resize', value: listing.area, label: 'sqft' },
+    { icon: 'bed-empty', value: listing.bedrooms || 'N/A', label: 'Bedrooms' },
+    { icon: 'shower', value: listing.baths || 'N/A', label: 'Bathrooms' },
+    { icon: 'shield-check', value: listing.squareFeet || 'N/A', label: 'Safety Rank' },
   ];
   const facilities = [
     { name: 'Car Parking', icon: 'car' },
@@ -227,9 +227,9 @@ const GalleryTab = ({ route }) => {
     return (
         <ScrollView contentContainerStyle={styles.galleryContainer}>
         <View style={styles.galleryRow}>
-          {listing.images.map((image, index) => (
+          {listing?.images.map((item, index) => (
             <View key={index} style={styles.imageContainer}>
-              <Image source={image} style={styles.galleryImage} />
+              <Image source={{ uri: item }} style={styles.galleryImage} />
             </View>
           ))}
         </View>
@@ -257,7 +257,9 @@ const GalleryTab = ({ route }) => {
   return (
   <>
     <ScrollView style={styles.container}>
-      <Image source={listing.image} style={styles.image} />
+      <View style={styles.imagetop}>
+      <Image source={{ uri: listing.image}} style={styles.image} />
+      </View>
       <View style={styles.header}>
         <Text style={styles.title}>{listing.title}</Text>
         <Text style={styles.address}>{listing.location}</Text>
@@ -266,18 +268,7 @@ const GalleryTab = ({ route }) => {
           <Text style={styles.ratingText}>{listing.rating} (6.8k review)</Text>
         </View>
       </View>
-      {/* <View style={styles.infoContainer}>
-        <View style={styles.infoItem}>
-          <Text style={styles.infoValue}>{listing.area}</Text>
-          <Text style={styles.infoLabel}>sqft</Text>
-        </View>
-        <View style={styles.infoItem}>
-          <Text style={styles.infoValue}>{listing.baths}</Text>
-          <Text style={styles.infoLabel}>Bathrooms</Text>
-        </View>
       
-      </View> */}
-      {/* </ScrollView> */}
     <Tab.Navigator
       screenOptions={{
         tabBarStyle: { backgroundColor: colors.background },
@@ -308,18 +299,32 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
+    
   },
-  image: {
-    width: '100%',
+  imagetop: {
+
     height: 200,
+    width: '100%',
+    backgroundColor:"#FFFFFF",
+    padding:10,
+    borderRadius: 10,
+     
+    },
+  image: {
+   
+    width: '100%',
+    height: "100%", // Use '100%' to fill the parent container
+    resizeMode: 'cover',
     borderRadius: 10,
   },
+  
   header: {
     marginVertical: 16,
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
+    color:"black"
   },
   address: {
     fontSize: 16,
@@ -328,10 +333,12 @@ const styles = StyleSheet.create({
   rating: {
     flexDirection: 'row',
     alignItems: 'center',
+    
   },
   ratingText: {
     marginLeft: 8,
     fontSize: 16,
+    color: 'gray',
   },
   infoContainer: {
     flexDirection: 'row',

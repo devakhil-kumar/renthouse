@@ -22,5 +22,6 @@ export const darkTheme = {
     primary: '#4285F4',
     secondary: '#2C2C2C',
     card: '#1E1E1E',
+    error:"red"
   },
 };

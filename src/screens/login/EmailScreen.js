@@ -1,38 +1,37 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, StatusBar } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, StatusBar, Alert } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
-import { sendOTP, reset } from '../../features/otpSlice'; // Adjust the path based on your project structure
+import { sendOTP, reset } from '../../features/otpSlice';
+import * as Yup from 'yup';
+import { useNavigation } from '@react-navigation/native';
 
-const EmailScreen = ({ onSubmit }) => {
+const validationSchema = Yup.object().shape({
+  email: Yup.string()
+    .email('Invalid email')
+    .required('Email is required'),
+});
+
+const EmailScreen = () => {
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const dispatch = useDispatch();
-  const { loading, success, error: apiError } = useSelector((state) => state.forgotPassword);
+  const navigation = useNavigation();
+  const { loading, error: apiError, success, email: otpEmail, otp ,id } = useSelector((state) => state.forgotPassword);
 
   useEffect(() => {
     if (success) {
-      onSubmit(email);
-      dispatch(reset());
+      navigation.navigate('otpscreen', { email: otpEmail, otp,id });
     }
-  }, [success, email, dispatch, onSubmit]);
+  }, [success, otpEmail, otp, navigation]);
 
-  useEffect(() => {
-    if (apiError) {
-      setError(apiError);
+  const handleSendOTP = async () => {
+    try {
+      await validationSchema.validate({ email });
+      setError('');
+      dispatch(sendOTP(email));
+    } catch (validationError) {
+      setError(validationError.message);
     }
-  }, [apiError]);
-
-  const handleSubmit = () => {
-    if (!email.trim()) {
-      setError('Please enter your email address');
-      return;
-    }
-    if (!/\S+@\S+\.\S+/.test(email)) {
-      setError('Please enter a valid email address');
-      return;
-    }
-    setError('');
-    dispatch(sendOTP(email));
   };
 
   return (
@@ -53,8 +52,14 @@ const EmailScreen = ({ onSubmit }) => {
             autoCapitalize="none"
           />
           {error ? <Text style={styles.errorText}>{error}</Text> : null}
-          <TouchableOpacity style={styles.button} onPress={handleSubmit} disabled={loading}>
-            <Text style={styles.buttonText}>{loading ? 'Sending...' : 'Send Verification Code'}</Text>
+          <TouchableOpacity 
+            style={[styles.button, loading && styles.disabledButton]} 
+            onPress={handleSendOTP} 
+            disabled={loading}
+          >
+            <Text style={styles.buttonText}>
+              {loading ? 'Sending...' : 'Send Verification Code'}
+            </Text>
           </TouchableOpacity>
         </View>
       </View>

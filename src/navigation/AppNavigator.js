@@ -6,6 +6,8 @@ import GenerScreen from '../screens/GenerScreen';
 import AuthNavigator from './AuthNavigator';
 import DrawerNavigator from '../components/navigation/DrawerNavigator';
 import { loadInitialState } from '../features/authSlice';
+import TabNavigator from '../components/navigation/TabNavigator';
+import UserTabNavigator from '../components/navigation/UserTabNavigator';
 
 
 const  AppNavigator = () => {
@@ -15,17 +17,19 @@ const  AppNavigator = () => {
   }, [dispatch]);
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
   const userRole = useSelector((state) => state.auth.userRole);
-  console.log({isLoggedIn ,userRole})
+  console.log({isLoggedIn ,userRole},"ttttttttt")
 
   return (
     <NavigationContainer>
-      {isLoggedIn 
-        ? (userRole != "null"||null && userRole !== undefined)
-          ? <DrawerNavigator />
-          : <GenerScreen />
-        : <AuthNavigator />
-      }
-    </NavigationContainer>
+    {isLoggedIn 
+      ? (userRole !== "null" && userRole !== null && userRole !== undefined)
+        ? userRole === 'user'
+          ? <UserTabNavigator /> // Route to UserTabNavigator
+          : <TabNavigator /> // Default to TabNavigator if userRole doesn't match
+        : <GenerScreen />
+      : <AuthNavigator />
+    }
+  </NavigationContainer>
   );
 };
 

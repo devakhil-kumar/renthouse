@@ -37,6 +37,7 @@ const styles = StyleSheet.create({
   title: {
     ...typography.body,
     fontWeight: 'bold',
+    color:"black"
   },
   price: {
     ...typography.body,

@@ -21,13 +21,13 @@ const SearchBar = ({ onPress }) => {
           placeholderTextColor={theme.colors.text}
           editable={false}
         />
-        <TouchableOpacity>
+        {/* <TouchableOpacity>
           <Icon name="close" size={24} color={theme.colors.text} />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </TouchableOpacity>
-      <TouchableOpacity style={[styles.filterButton, { backgroundColor: theme.colors.primary }]}>
+      {/* <TouchableOpacity style={[styles.filterButton, { backgroundColor: theme.colors.primary }]}>
         <Icon name="tune" size={24} color={theme.colors.background} />
-      </TouchableOpacity>
+      </TouchableOpacity> */}
     </View>
   );
 };

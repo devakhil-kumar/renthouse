@@ -54,7 +54,7 @@ react {
 /**
  * Set this to true to Run Proguard on Release builds to minify the Java bytecode.
  */
-def enableProguardInReleaseBuilds = false
+def enableProguardInReleaseBuilds = true
 
 /**
  * The preferred build flavor of JavaScriptCore (JSC)
@@ -120,3 +120,106 @@ dependencies {
 }
 
 apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesAppBuildGradle(project)
+
+
+
+
+// apply plugin: "com.android.application"
+// apply plugin: "org.jetbrains.kotlin.android"
+// apply plugin: "com.facebook.react"
+// apply from: file("../../node_modules/react-native-vector-icons/fonts.gradle")
+
+// /**
+//  * This is the configuration block to customize your React Native Android app.
+//  * By default you don't need to apply any configuration, just uncomment the lines you need.
+//  */
+// react {
+//     // React Native configuration (unchanged)
+// }
+
+// /**
+//  * Set this to true to Run Proguard on Release builds to minify the Java bytecode.
+//  */
+// def enableProguardInReleaseBuilds = true
+
+// /**
+//  * The preferred build flavor of JavaScriptCore (JSC)
+//  */
+// def jscFlavor = 'org.webkit:android-jsc:+'
+
+// android {
+//     ndkVersion rootProject.ext.ndkVersion
+//     buildToolsVersion rootProject.ext.buildToolsVersion
+//     compileSdk rootProject.ext.compileSdkVersion
+
+//     namespace "com.renthouse"
+//     defaultConfig {
+//         applicationId "com.renthouse"
+//         minSdkVersion rootProject.ext.minSdkVersion
+//         targetSdkVersion rootProject.ext.targetSdkVersion
+//         versionCode 1
+//         versionName "1.0"
+        
+//         // Add only the languages you need
+//         resConfigs "en", "es"
+//     }
+    
+//     signingConfigs {
+//         debug {
+//             storeFile file('debug.keystore')
+//             storePassword 'android'
+//             keyAlias 'androiddebugkey'
+//             keyPassword 'android'
+//         }
+//     }
+    
+//     buildTypes {
+//         debug {
+//             signingConfig signingConfigs.debug
+//         }
+//         release {
+//             signingConfig signingConfigs.debug
+//             minifyEnabled true
+//             shrinkResources true
+//             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+//         }
+//     }
+    
+//     // Enable ABI splits
+//     splits {
+//         abi {
+//             enable true
+//             reset()
+//             include "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
+//             universalApk false
+//         }
+//         // Enable density splits
+//         density {
+//             enable true
+//             exclude "ldpi", "mdpi", "xxhdpi", "xxxhdpi"
+//             compatibleScreens 'small', 'normal', 'large', 'xlarge'
+//         }
+//     }
+// }
+
+// dependencies {
+//     // The version of react-native is set by the React Native Gradle Plugin
+//     implementation("com.facebook.react:react-android")
+//     implementation 'com.google.android.gms:play-services-base:18.1.0'
+//     implementation 'com.google.android.gms:play-services-maps:18.1.0'
+//     implementation project(':react-native-bootsplash')
+//     implementation project(':react-native-vector-icons')
+    
+//     if (hermesEnabled.toBoolean()) {
+//         implementation("com.facebook.react:hermes-android")
+//     } else {
+//         implementation jscFlavor
+//     }
+// }
+
+// // Task to optimize PNG files
+// task optimizePngFiles(type: Exec) {
+//     commandLine 'find', '.', '-name', '*.png', '-exec', 'pngquant', '--quality=65-80', '--speed=1', '--force', '--ext', '.png', '{}', ';'
+// }
+
+// apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesAppBuildGradle(project)

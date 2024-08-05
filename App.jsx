@@ -1,5 +1,6 @@
 import 'react-native-gesture-handler';
-import React, { useEffect } from 'react';
+import React, { useState,useEffect } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import BootSplash from "react-native-bootsplash";
 import { useSelector, useDispatch } from 'react-redux';
@@ -7,10 +8,13 @@ import { Provider } from 'react-redux';
 import store from './src/app/store';
 import AppNavigator from './src/navigation/AppNavigator';
 import { loadInitialState } from './src/features/authSlice';
+import NetworkStatusBar from './src/components/common/NetworkStatusBar';
+import NetInfo from "@react-native-community/netinfo";
 
 const AppWrapper = () => {
   const dispatch = useDispatch();
-
+  const [isConnected, setIsConnected] = useState(true);
+  console.log(isConnected)
   useEffect(() => {
     const init = async () => {
       try {
@@ -20,15 +24,26 @@ const AppWrapper = () => {
       }
     };
 
-
+    const unsubscribe = NetInfo.addEventListener(state => {
+      setIsConnected(state.isConnected);
+    });
     
     init().finally(async () => {
       await BootSplash.hide({ fade: true });
       console.log("BootSplash has been hidden successfully");
     });
+
+    return () => {
+      unsubscribe();
+    };
   }, [dispatch]);
 
-  return <AppNavigator />;
+  return(
+    <View style={styles.container}>
+      <NetworkStatusBar isConnected={isConnected} />
+      <AppNavigator />
+    </View>
+  );
 };
 
 const App = () => {
@@ -40,5 +55,19 @@ const App = () => {
     </Provider>
   );
 };
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  networkStatusBar: {
+    backgroundColor: 'red',
+    padding: 10,
+    alignItems: 'center',
+  },
+  networkStatusText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+});
 
 export default App;

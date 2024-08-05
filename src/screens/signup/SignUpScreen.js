@@ -1,4 +1,4 @@
-import React, { useState ,useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -14,53 +14,78 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
-import { register } from '../../features/authSlice'; 
-import LoaderModal from '../../components/common/LoaderModel';
+import { register } from '../../features/authSlice';
+import * as Yup from 'yup';
+
+const validationSchema = Yup.object().shape({
+  name: Yup.string()
+  .matches(/^[a-zA-Z\s]+$/, 'Name can only contain letters and spaces')
+  .required('Name is required'),
+  email: Yup.string()
+    .email('Invalid email')
+    .matches(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/, 'Invalid email format')
+    .required('Email is required'),
+    password: Yup.string()
+    .min(6, 'Password must be at least 6 characters')
+    .required('Password is required'),
+  confirmPassword: Yup.string()
+    .oneOf([Yup.ref('password'), null], 'Passwords must match')
+    .required('Confirm Password is required'),
+});
+
 const SignUpScreen = () => {
-  // Initialize state variables for name, email, password, confirmPassword, errorMessage
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errors, setErrors] = useState({});
 
-  // Get navigation object to handle screen transitions
   const navigation = useNavigation();
-
-// Initialize dispatch for triggering actions and selector for accessing state
   const dispatch = useDispatch();
   const { loading, error } = useSelector((state) => state.auth);
 
-  // Reset error message whenever any input field changes
   useEffect(() => {
-    setErrorMessage('');
+    setErrors({});
   }, [name, email, password, confirmPassword]);
-
-  // Function to handle input changes and reset error message
-  const handleInputChange = (setter) => (value) => {
-    setter(value);
-    setErrorMessage('');
+  const formatName = (value) => {
+    const trimmedValue = value.trim();
+    return trimmedValue.charAt(0).toUpperCase() + trimmedValue.slice(1);
   };
-  console.log({ loading, error },"45")
+
+  const handleInputChange = (field, value) => {
+    switch (field) {
+      case 'name':
+        setName(value);
+        break;
+      case 'email':
+        setEmail(value);
+        break;
+      case 'password':
+        setPassword(value);
+        break;
+      case 'confirmPassword':
+        setConfirmPassword(value);
+        break;
+    }
+    setErrors(prev => ({ ...prev, [field]: '' }));
+  };
+  const capitalizeWords = (str) => {
+    return str.replace(/\b\w/g, char => char.toUpperCase());
+  };
+
+  const handleNameBlur = () => {
+    setName(prevName => {
+      let trimmedName = prevName.trim().replace(/\s+/g, ' '); // Trim leading, trailing, and multiple spaces
+      return capitalizeWords(trimmedName);
+    });
+  };
+
 
   const handleSignUp = async () => {
-     // Check if passwords match
-    if (password !== confirmPassword) {
-      setErrorMessage('Passwords do not match.');
-      return;
-    }
-      // Check if all fields are filled
-  
-    if (!name || !email || !password) {
-      setErrorMessage('Please fill in all fields.');
-      return;
-    }
-  
     try {
+      await validationSchema.validate({ name, email, password, confirmPassword }, { abortEarly: false });
       const resultAction = await dispatch(register({ name, email, password }));
-      console.log(register.fulfilled.match(resultAction),"22")
       if (register.fulfilled.match(resultAction)) {
-        // Registration successful
         Alert.alert(
           "Success",
           "Registration successful!",
@@ -71,20 +96,31 @@ const SignUpScreen = () => {
           navigation.navigate('Login');
         }, 3000);
       } else if (register.rejected.match(resultAction)) {
-        // Registration failed
-        setErrorMessage(resultAction.payload || 'Registration failed. Please try again.');
+        setErrors({ form: resultAction.payload || 'Registration failed. Please try again.' });
       }
     } catch (err) {
-      setErrorMessage('An error occurred. Please try again.');
+      if (err instanceof Yup.ValidationError) {
+        const validationErrors = {};
+        err.inner.forEach(error => {
+          validationErrors[error.path] = error.message;
+        });
+        setErrors(validationErrors);
+      } else {
+        setErrors({ form: 'An error occurred. Please try again.' });
+      }
     }
   };
 
-  // Function to navigate to the Login screen
   const handleLogin = () => {
     navigation.navigate('Login');
   };
 
-  // Render StatusBar, SafeAreaView, ScrollView, Input fields, Error Message, Sign Up button, and Login link
+  const getInputBorderColor = (field) => {
+    if (errors[field]) return 'red';
+    if (field === 'confirmPassword' && password === confirmPassword && password !== '') return 'green';
+    return '#ddd';
+  };
+
   return (
     <>
       <StatusBar backgroundColor="#4a90e2" barStyle="light-content" />
@@ -98,76 +134,80 @@ const SignUpScreen = () => {
           </View>
 
           <View style={styles.form}>
-            <View style={styles.inputContainer}>
+            <View style={[styles.inputContainer, { borderColor: getInputBorderColor('name') }]}>
               <Icon name="person-outline" size={24} color="#999" style={styles.icon} />
               <TextInput
                 style={styles.input}
                 placeholder="Enter Name"
+                onBlur={handleNameBlur}
                 value={name}
-                onChangeText={handleInputChange(setName)}
+                onChangeText={(value) => handleInputChange('name', value)}
                 placeholderTextColor="#999" 
                 autoCapitalize="words"
               />
             </View>
+            {errors.name && <Text style={styles.errorText}>{errors.name}</Text>}
 
-            <View style={styles.inputContainer}>
+            <View style={[styles.inputContainer, { borderColor: getInputBorderColor('email') }]}>
               <Icon name="mail-outline" size={24} color="#999" style={styles.icon} />
               <TextInput
                 style={styles.input}
                 placeholder="Enter Email Address"
                 value={email}
-                onChangeText={handleInputChange(setEmail)}
+                onChangeText={(value) => handleInputChange('email', value)}
                 keyboardType="email-address"
                 placeholderTextColor="#999" 
                 autoCapitalize="none"
               />
             </View>
+            {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
 
-            <View style={styles.inputContainer}>
+            <View style={[styles.inputContainer, { borderColor: getInputBorderColor('password') }]}>
               <Icon name="lock-closed-outline" size={24} color="#999" style={styles.icon} />
               <TextInput
                 style={styles.input}
                 placeholder="Enter Password"
                 value={password}
-                onChangeText={handleInputChange(setPassword)}
+                onChangeText={(value) => handleInputChange('password', value)}
                 placeholderTextColor="#999" 
                 secureTextEntry
               />
             </View>
+            {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
 
-            <View style={styles.inputContainer}>
+            <View style={[styles.inputContainer, { borderColor: getInputBorderColor('confirmPassword') }]}>
               <Icon name="lock-closed-outline" size={24} color="#999" style={styles.icon} />
               <TextInput
                 style={styles.input}
                 placeholder="Confirm Password"
                 value={confirmPassword}
-                onChangeText={handleInputChange(setConfirmPassword)}
+                onChangeText={(value) => handleInputChange('confirmPassword', value)}
                 placeholderTextColor="#999" 
                 secureTextEntry
               />
             </View>
+            {errors.confirmPassword && <Text style={styles.errorText}>{errors.confirmPassword}</Text>}
 
-            {(errorMessage || error) && (
-            <Text style={styles.errorText}>{errorMessage || error}</Text>
-          )}
+            {errors.form && <Text style={styles.errorText}>{errors.form}</Text>}
 
-<TouchableOpacity 
-            style={[styles.signUpButton, loading && styles.disabledButton]} 
-            onPress={handleSignUp}
-            disabled={loading}
-          >
-            {loading ? (
-              <ActivityIndicator color="white" />
-            ) : (
-              <Text style={styles.signUpText}>Sign Up</Text>
-            )}
-          </TouchableOpacity>
-            <View style={styles.registerContainer}>
-            <Text style={styles.registerText}>If you have already an account? </Text>
-            <TouchableOpacity onPress={handleLogin}>
-              <Text style={styles.registerLink}>SignIn Now</Text>
+            <TouchableOpacity 
+              style={[styles.signUpButton, loading && styles.disabledButton]} 
+              onPress={handleSignUp}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator color="white" />
+              ) : (
+                <Text style={styles.signUpText}>Sign Up</Text>
+              )}
             </TouchableOpacity>
-          </View>
+
+            <View style={styles.registerContainer}>
+              <Text style={styles.registerText}>If you have already an account? </Text>
+              <TouchableOpacity onPress={handleLogin}>
+                <Text style={styles.registerLink}>Sign In  Now</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </ScrollView>
       </SafeAreaView>
@@ -185,6 +225,12 @@ const styles = StyleSheet.create({
   },
   disabledButton: {
     backgroundColor: '#a9c8e8', // A lighter shade of your button color
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 12,
+    marginBottom: 5,
+    marginTop: 5,
   },
   header: {
     marginBottom: 30,
@@ -208,11 +254,11 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
+    // alignItems: 'center',
     borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 5,
-    marginBottom: 15,
+    marginTop: 10,
   },
   icon: {
     padding: 10,
@@ -222,17 +268,19 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingRight: 10,
     fontSize: 16,
+    color:"black"
   },
-  errorText: {
-    color: 'red',
-    textAlign: 'center',
-    marginBottom: 10,
-  },
+  // errorText: {
+  //   color: 'red',
+  //   // textAlign: 'center',
+  //   marginBottom: 15,
+  // },
   signUpButton: {
     backgroundColor: '#4a90e2',
     borderRadius: 5,
     padding: 15,
     alignItems: 'center',
+    marginTop: 15,
   },
   signUpText: {
     color: 'white',

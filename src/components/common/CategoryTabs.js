@@ -3,20 +3,31 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, useColorScheme } from 'react-native';
 import { lightTheme, darkTheme } from './theme';
 
-const CategoryTabs = () => {
+const CategoryTabs = ({ activeTab, onTabPress }) => {
   const colorScheme = useColorScheme();
   const theme = colorScheme === 'dark' ? darkTheme : lightTheme;
 
-  const categories = ['Listing', 'Rent', 'Sold', 'Reviews'];
+  const categories = ['Listing', 'Reviews'];
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       {categories.map((category) => (
         <TouchableOpacity
           key={category}
-          style={[styles.tab, { backgroundColor: theme.colors.card }]}
+          style={[
+            styles.tab,
+            { backgroundColor: activeTab === category ? theme.colors.primary : theme.colors.card }
+          ]}
+          onPress={() => onTabPress(category)}
         >
-          <Text style={[styles.tabText, { color: theme.colors.text }]}>{category}</Text>
+          <Text 
+            style={[
+              styles.tabText, 
+              { color: activeTab === category ? theme.colors.background : theme.colors.text }
+            ]}
+          >
+            {category}
+          </Text>
         </TouchableOpacity>
       ))}
     </View>
@@ -28,7 +39,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     padding: 10,
-    backgroundColor: 'white', // Add this to ensure visibility when sticky
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
   },
   tab: {
     paddingVertical: 8,
@@ -37,6 +49,7 @@ const styles = StyleSheet.create({
   },
   tabText: {
     fontSize: 14,
+    fontWeight: 'bold',
   },
 });
 

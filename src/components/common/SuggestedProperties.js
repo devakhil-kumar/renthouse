@@ -27,6 +27,7 @@ const styles = StyleSheet.create({
   title: {
     ...typography.sectionTitle,
     marginBottom: 10,
+    color:"black"
   },
 });
 

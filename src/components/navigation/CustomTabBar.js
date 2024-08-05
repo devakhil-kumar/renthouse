@@ -77,6 +77,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: '#e0e0e0',
     paddingTop: 10,
+    
   },
   tabBarItem: {
     flex: 1,
