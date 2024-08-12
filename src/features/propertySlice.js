@@ -92,6 +92,7 @@ const propertySlice = createSlice({
       // Update Property
       .addCase(updateProperty.pending, (state) => {
         state.loading = true;
+        state.error = null;
       })
       .addCase(updateProperty.fulfilled, (state, action) => {
         state.loading = false;
@@ -108,6 +109,7 @@ const propertySlice = createSlice({
       // Delete Property
       .addCase(deleteProperty.pending, (state) => {
         state.loading = true;
+        state.error = null;
       })
       .addCase(deleteProperty.fulfilled, (state, action) => {
         state.loading = false;
@@ -121,6 +123,7 @@ const propertySlice = createSlice({
       // Get Properties
       .addCase(getProperties.pending, (state) => {
         state.loading = true;
+        state.error = null;
       })
       .addCase(getProperties.fulfilled, (state, action) => {
         state.loading = false;

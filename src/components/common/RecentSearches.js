@@ -4,12 +4,12 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { colors, typography } from '../../styles';
 
 const recentSearches = [
-  { id: '1', location: 'Balga, WA 6061', type: 'Buy', propertyType: 'House', beds: '2+', baths: '1+', parking: '1+' },
-  { id: '2', location: 'Balga, WA 6061', type: 'Buy', propertyType: 'House', beds: '2+', baths: '1+', parking: '1+' },
-  { id: '3', location: 'Balga, WA 6061', type: 'Buy', propertyType: 'House', beds: '2+', baths: '1+', parking: '1+' },
-  { id: '4', location: 'Balga, WA 6061', type: 'Buy', propertyType: 'House', beds: '2+', baths: '1+', parking: '1+' },
-  { id: '5', location: 'Balga, WA 6061', type: 'Buy', propertyType: 'House', beds: '2+', baths: '1+', parking: '1+' },
-  { id: '6', location: 'Balga, WA 6061', type: 'Buy', propertyType: 'House', beds: '2+', baths: '1+', parking: '1+' },
+  // { id: '1', location: 'Balga, WA 6061', type: 'Buy', propertyType: 'House', beds: '2+', baths: '1+', parking: '1+' },
+  // { id: '2', location: 'Balga, WA 6061', type: 'Buy', propertyType: 'House', beds: '2+', baths: '1+', parking: '1+' },
+  // { id: '3', location: 'Balga, WA 6061', type: 'Buy', propertyType: 'House', beds: '2+', baths: '1+', parking: '1+' },
+  // { id: '4', location: 'Balga, WA 6061', type: 'Buy', propertyType: 'House', beds: '2+', baths: '1+', parking: '1+' },
+  // { id: '5', location: 'Balga, WA 6061', type: 'Buy', propertyType: 'House', beds: '2+', baths: '1+', parking: '1+' },
+  // { id: '6', location: 'Balga, WA 6061', type: 'Buy', propertyType: 'House', beds: '2+', baths: '1+', parking: '1+' },
 ];
 
 const RecentSearchItem = ({ item }) => (
@@ -34,15 +34,24 @@ const RecentSearches = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Recent Searches</Text>
-      <FlatList
-        data={displayedSearches}
-        renderItem={({ item }) => <RecentSearchItem item={item} />}
-        keyExtractor={item => item.id}
-      />
-      {recentSearches.length > 2 && (
-        <TouchableOpacity onPress={handleShowAll}>
-          <Text style={styles.seeAll}>{showAll ? 'Show less' : 'See all'}</Text>
-        </TouchableOpacity>
+      {recentSearches.length > 0 ? (
+        <>
+          <FlatList
+            data={displayedSearches}
+            renderItem={({ item }) => <RecentSearchItem item={item} />}
+            keyExtractor={item => item.id}
+          />
+          {recentSearches.length > 2 && (
+            <TouchableOpacity onPress={handleShowAll}>
+              <Text style={styles.seeAll}>{showAll ? 'Show less' : 'See all'}</Text>
+            </TouchableOpacity>
+          )}
+        </>
+      ) : (
+        <View style={styles.noSearchesContainer}>
+          <Icon name="search-off" size={48} color={colors.textLight} />
+          <Text style={styles.noSearchesText}>You have not searched yet </Text>
+        </View>
       )}
     </View>
   );
@@ -78,6 +87,16 @@ const styles = StyleSheet.create({
   },
   seeAll: {
     ...typography.link,
+    marginTop: 10,
+  },
+  noSearchesContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 20,
+  },
+  noSearchesText: {
+    ...typography.body,
+    color: colors.textLight,
     marginTop: 10,
   },
 });

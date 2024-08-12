@@ -5,7 +5,7 @@ import {
 } from 'react-native';
 import user from "../../../assets/user.png"
 import { useDispatch } from 'react-redux';
-import { updateUser,getuser,fetchUserDetails} from '../../features/authSlice';
+import {logoutUser, updateUser} from '../../features/authSlice';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const UserProfile = () => {

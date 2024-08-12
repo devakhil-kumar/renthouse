@@ -1,10 +1,12 @@
-import React from 'react';
-import { ScrollView, View, Text, Image, StyleSheet, useWindowDimensions,FlatList, } from 'react-native';
+import React,{useState,useEffect} from 'react';
+import { ScrollView, View, Text, Image, StyleSheet, useWindowDimensions,FlatList, TouchableOpacity, Modal ,TouchableWithoutFeedback, Linking, Platform, Animated   } from 'react-native';
 import { useTheme } from '@react-navigation/native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Address from '../../components/common/Address';
 import ReviewTab from './ReviewTab';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { PanGestureHandler, State } from 'react-native-gesture-handler';
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -12,8 +14,91 @@ const ApartmentScreen = ({ route }) => {
   const { listing } = route.params;
   const { colors } = useTheme();
   const { width } = useWindowDimensions();
+ 
+;
 
 
+  const [modalVisible, setModalVisible] = useState(false);
+  const [userRole, setUserRole] = useState(null);
+console.log(userRole==="user")
+  const toggleModal = () => {
+    setModalVisible(!modalVisible);
+  };
+
+  const translateY = new Animated.Value(0)
+  const onGestureEvent = Animated.event(
+    [{ nativeEvent: { translationY: translateY } }],
+    { useNativeDriver: true }
+  );
+
+  const onHandlerStateChange = ({ nativeEvent }) => {
+    if (nativeEvent.state === State.END) {
+      if (nativeEvent.translationY > 10) {
+        // If the user has swiped down by more than 100 pixels, close the modal
+        Animated.timing(translateY, {
+          toValue: 500, // move the modal out of the screen
+          duration: 300,
+          useNativeDriver: true,
+        }).start(() => setModalVisible(false));
+      } else {
+        // If not, reset the position
+        Animated.spring(translateY, {
+          toValue: 0,
+          useNativeDriver: true,
+        }).start();
+      }
+    }
+  };
+
+
+  useEffect(() => {
+    const getUserRole = async () => {
+      try {
+        const user = await AsyncStorage.getItem('user');
+        console.log('Stored user data:', user); // Log the user data
+        if (user) {
+          const parsedUser = JSON.parse(user);
+          console.log('Parsed user data:', parsedUser); // Log the parsed user data
+          setUserRole(parsedUser.role);
+         
+        }
+      } catch (error) {
+        console.error('Failed to fetch user ID from AsyncStorage:', error);
+      }
+    };
+    getUserRole();
+  }, []);
+
+  const  agentData= {
+    name: "Sarah Johnson",
+    address: "456 Oak Avenue, Sunnyville, CA 90210",
+    phone: "+1 (555) 123-4567",
+    imageUrl: "http://95.216.209.46:5500/uploads/properties_1722843949432-image_1.jpeg"
+  };
+  const handleCallNow = () => {
+    let phoneNumber = +917560029425;
+    if (Platform.OS !== 'android') {
+      phoneNumber = `telprompt:${phoneNumber}`;
+    } else {
+      phoneNumber = `tel:${phoneNumber}`;
+    }
+    console.log( Linking.canOpenURL(phoneNumber),"ll")
+    Linking.canOpenURL(phoneNumber)
+      .then(supported => {
+        console.log(supported,"gg")
+        if (!supported) {
+          alert('Phone number is not available');
+        } else {
+          return Linking.openURL(phoneNumber);
+        }
+      })
+      .catch(err => console.error('An error occurred', err));
+  };
+
+  const handleRequestCall = () => {
+    // Implement request call functionality here
+    alert('Call request sent to the agent');
+  };
 const DescriptionTab = ({ listing }) => {
   const { colors } = useTheme();
   const propertyDetails = [
@@ -203,25 +288,7 @@ const DescriptionTab = ({ listing }) => {
   );
 };
 
-//   const GalleryTab = ({ route }) => {
-//     const { listing } = route.params;
-//     console.log(listing.images)
-//     const renderItem = ({ item }) => (
-//         <View style={styles.imageContainer}>
-//           <Image source={item.images} style={styles.galleryImage} />
-//         </View>
-//       );
-   
-//   return (
-//     <FlatList
-//       data={listing}
-//       renderItem={renderItem}
-//       keyExtractor={(item, index) => index.toString()}
-//       numColumns={2}
-//       contentContainerStyle={styles.galleryContainer}
-//     />
-//   );
-//   };
+
 const GalleryTab = ({ route }) => {
     const { listing } = route.params;
     return (
@@ -237,22 +304,7 @@ const GalleryTab = ({ route }) => {
     );
   };
 
-//   const ReviewTab = ({ route }) => {
-//     const { listing } = route.params;
-//     console.log(listing)
-//     return (
-//       <ScrollView style={styles.reviewContainer}>
-       
-//        {listing.reviews.map((review, index) => (
-//           <View key={index} style={styles.reviewItem}>
-//             <Text style={styles.reviewText}>{review.text}</Text>
-//             <Text style={styles.reviewAuthor}>{review.author}</Text>
-//           </View>
-//         ))}
-  
-//       </ScrollView>
-//     );
-//   };
+
 
   return (
   <>
@@ -265,7 +317,7 @@ const GalleryTab = ({ route }) => {
         <Text style={styles.address}>{listing.location}</Text>
         <View style={styles.rating}>
           <Icon name="star" size={20} color="#FFD700" />
-          <Text style={styles.ratingText}>{listing.rating} (6.8k review)</Text>
+          <Text style={styles.ratingText}>{listing.rating} (N/A review)</Text>
         </View>
       </View>
       
@@ -291,6 +343,49 @@ const GalleryTab = ({ route }) => {
 />
     </Tab.Navigator>
     </ScrollView>
+    {userRole == 'user' && (
+      <TouchableOpacity style={styles.contactButton} onPress={toggleModal}>
+        <Text style={styles.contactButtonText}>Contact</Text>
+      </TouchableOpacity>
+    )}
+     <Modal
+      animationType="slide"
+      transparent={true}
+      visible={modalVisible}
+      onRequestClose={toggleModal}
+    >
+      <View style={styles.modalOverlay}>
+        <PanGestureHandler
+          onGestureEvent={onGestureEvent}
+          onHandlerStateChange={onHandlerStateChange}
+        >
+          <Animated.View style={[styles.modalContainer, { transform: [{ translateY }] }]}>
+         
+            <View style={styles.topHeader}>
+              <Text style={styles.agentTitle}>Agent Details</Text>
+            </View>
+            <Image
+              style={styles.agentImage}
+              source={{ uri: agentData?.imageUrl || "http://95.216.209.46:5500/uploads/properties_1722843949432-image_1.jpeg" }}
+            />
+            <Text style={styles.agentName}>{agentData.name}</Text>
+            <Text style={styles.agentAddress}>{agentData.address}</Text>
+            <View style={styles.modalButtons}>
+              <TouchableOpacity style={styles.modalButton} onPress={handleCallNow}>
+                <Text style={styles.modalButtonText}>Call Now</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.modalButton} onPress={handleRequestCall}>
+                <Text style={styles.modalButtonText}>Request Call</Text>
+              </TouchableOpacity>
+            </View>
+            {/* Simple Close Button */}
+            <TouchableOpacity style={styles.closeButton} onPress={toggleModal}>
+              <Icon name="close" size={24} color="white" />
+            </TouchableOpacity>
+          </Animated.View>
+        </PanGestureHandler>
+      </View>
+    </Modal>
     </>
   );
 };
@@ -398,6 +493,116 @@ const styles = StyleSheet.create({
   galleryImage: {
     width: '100%',
     height: 150,
+  },
+  contactButton: {
+    backgroundColor: "#4285F4", // Adjust color as needed
+    padding: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
+  },
+  contactButtonText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+  },
+  modalOverlay2:{
+    // flexGrow: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+  },
+  modalContainer: {
+    width: '80%',
+    backgroundColor: 'white',
+    borderRadius: 20,
+    alignItems: 'center',
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+    position: 'relative',
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    width: 40,
+    height: 40,
+    borderRadius: 20, // Circular button
+    // backgroundColor: '#FF0000', // Red background for close buttons
+    justifyContent: 'center',
+    alignItems: 'center',
+    // elevation: 5, // Add shadow for better visibility
+  },
+  topHeader: {
+    backgroundColor: "#4285F4",
+    width: '100%',
+    alignItems: "center",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 15,
+  },
+  agentTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: 'white',
+  },
+  agentImage: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    marginVertical: 20,
+    borderWidth: 3,
+    borderColor: '#4285F4',
+  },
+  agentName: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: '#333',
+  },
+  agentAddress: {
+    fontSize: 16,
+    marginBottom: 20,
+    textAlign: 'center',
+    color: '#666',
+    paddingHorizontal: 20,
+  },
+  agentPhone: {
+    fontSize: 18,
+    marginBottom: 20,
+    color: '#4285F4',
+    fontWeight: '500',
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
+    paddingHorizontal: 20,
+    marginBottom: 20,
+  },
+  modalButton: {
+    backgroundColor: '#4285F4',
+    paddingVertical: 12,
+    paddingHorizontal: 25,
+    borderRadius: 25,
+    elevation: 2,
+  },
+  modalButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
 

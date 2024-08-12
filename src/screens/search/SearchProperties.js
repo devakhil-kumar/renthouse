@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState,useEffect} from 'react';
 import {
   View,
   Text,
@@ -18,15 +18,19 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import {lightTheme, darkTheme} from '../../components/common/theme'; // Adjust this import path as needed
 import { useDispatch, useSelector } from 'react-redux';
 import { searchProperties } from '../../features/searchPropertySlice';
+import { addRecentSearch ,fetchRecentSearches} from '../../features/recentSearchesSlice';
 import SearchList from '../../components/common/SearchList';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SearchProperties = () => {
   const dispatch = useDispatch();
-  const { properties, loading, error } = useSelector((state) => state.searchProperties);
-console.log(properties.properties)
-console.log(loading)
+  const { properties, loading: searchLoading, error: searchError } = useSelector((state) => state.searchProperties);
+  const { recentSearches, loading: recentSearchesLoading, error: recentSearchesError } = useSelector(state => state.recentSearches);
+console.log(recentSearches)
+// console.log(loading)
 console.log(properties)
   const [searchQuery, setSearchQuery] = useState('');
+  const [userId, setUserId] = useState(null);
   const colorScheme = useColorScheme();
   const [activeTab, setActiveTab] = useState('recent');
   const [isModalVisible, setModalVisible] = useState(false);
@@ -37,6 +41,26 @@ console.log(properties)
   const [bathrooms, setBathrooms] = useState('Any');
   const [minArea, setMinArea] = useState('');
   const [maxArea, setMaxArea] = useState('');
+ 
+  useEffect(() => {
+    const getUserId = async () => {
+      try {
+        const user = await AsyncStorage.getItem('user');
+        console.log('Stored user data:', user); // Log the user data
+        if (user) {
+          const parsedUser = JSON.parse(user);
+          const storedUserId=parsedUser._id
+          console.log('Parsed user data:', parsedUser); // Log the parsed user data
+          setUserId(parsedUser._id);
+          dispatch(fetchRecentSearches(storedUserId));
+        }
+      } catch (error) {
+        console.error('Failed to fetch user ID from AsyncStorage:', error);
+      }
+    };
+    getUserId();
+  }, []);
+  
 
   const theme = colorScheme === 'dark' ? darkTheme : lightTheme;
   const styles = StyleSheet.create({
@@ -276,21 +300,37 @@ console.log(properties)
       top: 10,
       marginLeft: -10,
     },
+    searchButtonContainer: {
+      marginLeft: 10,
+    },
+    searchButton: {
+      backgroundColor: theme.colors.primary,
+      borderRadius: 20,
+      width: 40,
+      height: 40,
+      justifyContent: 'center',
+      alignItems: 'center',
+      elevation: 2, // for Android shadow
+      shadowColor: '#000', // for iOS shadow
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.2,
+      shadowRadius: 2,
+    },
   });
 
-  const [recentSearches, setRecentSearches] = useState([
-    {id: '1', location: 'Balga, WA 6061', details: 'Buy . House . 2+ 1+ 1+'},
-    {id: '2', location: 'Balga, WA 6061', details: 'Buy . House . 2+ 1+ 1+'},
-    {id: '3', location: 'Balga, WA 6061', details: 'Buy . House . 2+ 1+ 1+'},
-  ]);
+  // const [recentSearches, setRecentSearches] = useState([
+  //   // {id: '1', location: 'Balga, WA 6061', details: 'Buy . House . 2+ 1+ 1+'},
+  //   // {id: '2', location: 'Balga, WA 6061', details: 'Buy . House . 2+ 1+ 1+'},
+  //   // {id: '3', location: 'Balga, WA 6061', details: 'Buy . House . 2+ 1+ 1+'},
+  // ]);
 
   const [savedSearches, setSavedSearches] = useState([
-    {
-      id: '1',
-      location: 'Saved Location 1',
-      details: 'Rent . Apartment . 1+ 1+ 1+',
-    },
-    {id: '2', location: 'Saved Location 2', details: 'Buy . House . 3+ 2+ 2+'},
+    // {
+    //   id: '1',
+    //   location: 'Saved Location 1',
+    //   details: 'Rent . Apartment . 1+ 1+ 1+',
+    // },
+    // {id: '2', location: 'Saved Location 2', details: 'Buy . House . 3+ 2+ 2+'},
     // ...
   ]);
 
@@ -299,7 +339,7 @@ console.log(properties)
       <Icon name="search" size={24} color={theme.colors.text} />
       <View style={styles.searchItemContent}>
         <Text style={[styles.searchItemLocation, {color: theme.colors.text}]}>
-          {item.location}
+          {item.searchText}
         </Text>
         <Text
           style={[
@@ -345,6 +385,20 @@ console.log(properties)
  
 };
 
+const handleSearchPress = () => {
+  if (searchQuery.trim() !== '') {
+    const searchData = {
+      userId: userId, // You'll need to define or obtain userId
+      searchText: searchQuery
+    };
+    dispatch(addRecentSearch(searchData));
+  }
+};
+
+const handleCancelPress = () => {
+  setSearchQuery('');
+};
+
   const toggleModal = () => {
     setModalVisible(!isModalVisible);
   };
@@ -356,13 +410,13 @@ console.log(properties)
   };
 
   const renderContent = () => {
-    if (loading) {
+    if (searchLoading) {
       return <ActivityIndicator size="large" color={theme.colors.primary} />;
     }
 
-    if (error) {
-      return <Text style={{color: theme.colors.error}}>{error}</Text>;
-    }
+    // if (error) {
+    //   return <Text style={{color: theme.colors.error}}>{error}</Text>;
+    // }
 
     if (properties && Array.isArray(properties.properties) && properties.properties.length > 0) {
       return <SearchList properties={properties.properties}  />;
@@ -403,12 +457,11 @@ console.log(properties)
             styles.searchContainer,
             {backgroundColor: theme.colors.secondary},
           ]}>
-          <Icon
-            name="search"
-            size={24}
-            color={theme.colors.text}
-            style={styles.searchIcon}
-          />
+            {searchQuery !== '' && (
+            <TouchableOpacity onPress={handleCancelPress} style={styles.iconButton}>
+            <Icon name="close" size={24} color={theme.colors.text} />
+            </TouchableOpacity>
+          )}
           <TextInput
             style={[styles.searchInput, {color: theme.colors.text}]}
             placeholder="Search by Address, City, or ZIP"
@@ -416,10 +469,15 @@ console.log(properties)
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
-          {searchQuery !== '' && (
-            <TouchableOpacity onPress={() => setSearchQuery('')}>
-              <Icon name="close" size={24} color={theme.colors.text} />
-            </TouchableOpacity>
+         {searchQuery !== '' && (
+           <View style={styles.searchButtonContainer}>
+           <TouchableOpacity 
+             onPress={handleSearchPress}
+             style={styles.searchButton}
+           >
+             <Icon name="search" size={20} color={theme.colors.background} />
+           </TouchableOpacity>
+         </View>
           )}
         </View>
         <TouchableOpacity

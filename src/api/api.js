@@ -57,3 +57,48 @@ export const searchPropertiesAPI = (queryParams) => {
   console.log(`${API_ROUTES.SEARCH_PROPERTIES}?${queryString}`)
   return axiosInstance.get(`${API_ROUTES.SEARCH_PROPERTIES}?${queryString}`);
 };
+
+
+
+
+export const addRecentSearchAPI = (searchData) => {
+  return axiosInstance.post(API_ROUTES.ADD_RECENT_SEARCH, searchData);
+};
+
+// Get Recent Searches
+export const getRecentSearchesAPI = (userId) => {
+  console.log(`${API_ROUTES.GET_RECENT_SEARCHES}?userId=${userId}`)
+  return axiosInstance.get(`${API_ROUTES.GET_RECENT_SEARCHES}?userId=${userId}`);
+};
+
+// Add Viewed Property
+export const addViewedPropertyAPI = (viewedPropertyData) => {
+  return axiosInstance.post(API_ROUTES.ADD_RECENT_VIEWED_PROPERTY, viewedPropertyData);
+};
+
+// Get Viewed Properties
+export const getViewedPropertiesAPI = (userId) => {
+  return axiosInstance.get(`${API_ROUTES.GET_RECENT_VIEWED_PROPERTIES}?userId=${userId}`);
+};
+
+// Get suggested Properties
+export const getSuggestedPropertiesAPI = () => {
+  return axiosInstance.get(API_ROUTES.GET_SUGGESTED_PROPERTIES);
+};
+
+// Get featured Properties
+export const getFeaturedPropertiesAPI = () => {
+  return axiosInstance.get(API_ROUTES.GET_FEATURED_PROPERTIES);
+};
+
+
+
+
+export const addFavoritePropertyAPI = (viewedPropertyData) => {
+  return axiosInstance.post(API_ROUTES.ADD_FAVORITE_PROPERTY, viewedPropertyData);
+};
+
+// Get Viewed Properties
+export const getFavoritePropertiesAPI = (userId) => {
+  return axiosInstance.get(`${API_ROUTES.GET_FAVORITE_PROPERTIES}?userId=${userId}`);
+};

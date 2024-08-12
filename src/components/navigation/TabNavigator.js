@@ -16,12 +16,12 @@ import NotificationScreen from '../../screens/notification/NotificationScreen';
 import ProfileScreen from '../../screens/profile/ProfileScreen';
 import {getFocusedRouteNameFromRoute} from '@react-navigation/native';
 import {useDispatch} from 'react-redux';
-// import { logout } from '../../features/authSlice';
 import RenterProfile from '../../screens/profile/RenterProfile';
 import ApartmentScreen from '../../screens/myProperty/ApartmentScreen';
 import AddPropertyStep1 from '../../screens/myProperty/AddPropertyStep1';
 import AddPropertyStep2 from '../../screens/myProperty/AddPropertyStep2';
 import SearchProperties from '../../screens/search/SearchProperties';
+import { logoutUser } from '../../features/authSlice';
 
 const Tab = createBottomTabNavigator();
 
@@ -37,13 +37,9 @@ const CustomHeader = ({navigation, title}) => (
     <View style={styles.headerContainer}>
       <View style={styles.headerContent}>
         <Text style={styles.headerTitle}>{title}</Text>
-        {/* <TouchableOpacity onPress={() => navigation.navigate('Notification')} style={styles.notificationButton}>
-        <Icon name="notifications-outline" size={24} color="#fff" />
-      </TouchableOpacity> */}
+       
       </View>
-      {/* <Text style={styles.subHeaderText}>
-        This is a ten word subheader text for demonstration purposes
-      </Text> */}
+      
     </View>
   </>
 );
@@ -146,28 +142,32 @@ const NotificationStackScreen = () => (
   </NotificationStack.Navigator>
 );
 
-const ProfileStackScreen = () => (
-  <ProfileStack.Navigator>
-    <ProfileStack.Screen
-      name="Profilestack"
-      component={ProfileScreen}
-      options={({navigation}) => ({
-        header: () => <CustomHeader navigation={navigation} title="Profile" />,
-        headerStyle: {backgroundColor: '#4a90e2'},
-        headerTintColor: 'white',
-      })}
-    />
-    <ProfileStack.Screen
-      name="RenterProfile"
-      component={RenterProfile}
-      options={{
-        headerTitle: 'Renter Profile',
-        headerStyle: {backgroundColor: '#4a90e2'},
-        headerTintColor: 'white',
-      }}
-    />
-  </ProfileStack.Navigator>
-);
+const ProfileStackScreen = () => {
+ 
+
+  return (
+    <ProfileStack.Navigator>
+      <ProfileStack.Screen
+        name="Profilestack"
+        component={ProfileScreen}
+        options={({navigation}) => ({
+          header: () => <CustomHeader navigation={navigation} title="Profile" />,
+          headerStyle: {backgroundColor: '#4a90e2'},
+          headerTintColor: 'white',
+        })}
+      />
+      <ProfileStack.Screen
+        name="RenterProfile"
+        component={RenterProfile}
+        options={{
+          headerTitle: 'Renter Profile',
+          headerStyle: {backgroundColor: '#4a90e2'},
+          headerTintColor: 'white',
+        }}
+      />
+    </ProfileStack.Navigator>
+  );
+};
 
 const TabNavigator = () => {
   // const dispatch = useDispatch();

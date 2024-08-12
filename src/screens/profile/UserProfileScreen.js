@@ -7,7 +7,7 @@ import { useDispatch } from 'react-redux';
 import Modal from 'react-native-modal';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { logout,updateUser} from '../../features/authSlice';
+import {logoutUser, updateUser} from '../../features/authSlice';
 
 const { width } = Dimensions.get('window');
 
@@ -19,11 +19,17 @@ const UserProfileScreen = () => {
   const [avatarUri, setAvatarUri] = useState(null);
   const [ID, setId] = useState(null);
 
-  const handleLogout = () => {
-    dispatch(logout());
-    console.log('Logout pressed');
+  const handleLogout = async () => {
+    await dispatch(logoutUser());
+    
+    // Reset navigation
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [{ name: 'Auth' }], // Replace 'Login' with your initial route name
+      })
+    );
   };
-
   useEffect(() => {
     const getUserId = async () => {
       try {
@@ -146,6 +152,7 @@ const UserProfileScreen = () => {
           description=""
           left={props => <List.Icon {...props} icon="cash" />}
           right={props => <List.Icon {...props} icon="chevron-right" />}
+          onPress={() => navigation.navigate('Profile', { screen: 'PrivacyPolicy' })}
           style={styles.listItem}
         />
         <List.Item
@@ -153,6 +160,7 @@ const UserProfileScreen = () => {
           description="View our comprehensive guides and take control of your property journey"
           left={props => <List.Icon {...props} icon="book-open-variant" />}
           right={props => <List.Icon {...props} icon="chevron-right" />}
+          onPress={() => navigation.navigate('Profile', { screen: 'TermsCondition' })}
           style={styles.listItem}
         />
       </Card>

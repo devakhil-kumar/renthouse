@@ -7,7 +7,15 @@ import {
   updatePropertyAPI,
   deletePropertyAPI,
   getPropertiesAPI,
-  searchPropertiesAPI 
+  searchPropertiesAPI ,
+  addRecentSearchAPI,
+  getRecentSearchesAPI,
+  addViewedPropertyAPI,
+  getViewedPropertiesAPI,
+  getSuggestedPropertiesAPI,
+  getFeaturedPropertiesAPI,
+  addFavoritePropertyAPI,
+  getFavoritePropertiesAPI,
 } from './api'; // Adjust path based on your project structure
 
 export const loginService = async userData => {
@@ -127,5 +135,88 @@ export const searchPropertiesService = async (queryParams) => {
   } catch (error) {
     console.error('Search failed:', error);
     throw new Error('Searching properties failed. Please try again later.'); // Customize error handling as needed
+  }
+};
+
+
+
+export const addRecentSearchService = async (searchData) => {
+  try {
+    const response = await addRecentSearchAPI(searchData);
+    return response.data; // Assuming your API returns the added search data
+  } catch (error) {
+    throw new Error('Adding recent search failed. Please try again later.');
+  }
+};
+
+// Get Recent Searches Service
+export const getRecentSearchesService = async (userId) => {
+  try {
+    const response = await getRecentSearchesAPI(userId);
+    return response.data; // Assuming your API returns the list of recent searches
+  } catch (error) {
+    throw new Error('Fetching recent searches failed. Please try again later.');
+  }
+};
+
+// Add Viewed Property Service
+export const addViewedPropertyService = async (viewedPropertyData) => {
+  try {
+    const response = await addViewedPropertyAPI(viewedPropertyData);
+    return response.data; // Assuming your API returns the added viewed property data
+  } catch (error) {
+    throw new Error('Adding viewed property failed. Please try again later.');
+  }
+};
+
+// Get Viewed Properties Service
+export const getViewedPropertiesService = async (userId) => {
+  try {
+    const response = await getViewedPropertiesAPI(userId);
+    return response.data; // Assuming your API returns the list of viewed properties
+  } catch (error) {
+    throw new Error('Fetching viewed properties failed. Please try again later.');
+  }
+};
+
+// Get Viewed Properties Service
+export const getSuggestedPropertiesService = async () => {
+  try {
+    const response = await getSuggestedPropertiesAPI();
+    return response.data; // Assuming your API returns the list of viewed properties
+  } catch (error) {
+    throw new Error('Fetching viewed properties failed. Please try again later.');
+  }
+};
+
+// Get Viewed Properties Service
+export const getFeaturedPropertiesService = async () => {
+  try {
+    const response = await getFeaturedPropertiesAPI();
+    return response.data; // Assuming your API returns the list of viewed properties
+  } catch (error) {
+    throw new Error('Fetching viewed properties failed. Please try again later.');
+  }
+};
+
+
+// Add favorite Properties Service
+
+export const addFavoritePropertyService = async (viewedPropertyData) => {
+  try {
+    const response = await addFavoritePropertyAPI(viewedPropertyData);
+    return response.data; // Assuming your API returns the added viewed property data
+  } catch (error) {
+    throw new Error('Adding favorite property failed. Please try again later.');
+  }
+};
+
+// Get favorite Properties Service
+export const getFavoritePropertiesService = async (userId) => {
+  try {
+    const response = await getFavoritePropertiesAPI(userId);
+    return response.data; // Assuming your API returns the list of viewed properties
+  } catch (error) {
+    throw new Error('Fetching favorite properties failed. Please try again later.');
   }
 };

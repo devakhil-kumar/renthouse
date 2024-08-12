@@ -5,6 +5,7 @@ import PropertyCard2 from './PropertyCard2';
 import { lightTheme, darkTheme } from './theme';
 
 const PropertyGrid = ({ properties }) => {
+  console.log(properties)
   const colorScheme = useColorScheme();
   const theme = colorScheme === 'dark' ? darkTheme : lightTheme;
 

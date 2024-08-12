@@ -203,3 +203,13 @@ const authSlice = createSlice({
 export const { logout,  initializeState,setUserRole} = authSlice.actions;
 
 export default authSlice.reducer;
+
+
+export const logoutUser = () => async (dispatch) => {
+  try {
+    await AsyncStorage.multiRemove(['token', 'user', 'userRole']);
+    dispatch(logout());
+  } catch (error) {
+    console.error('Logout error:', error);
+  }
+};

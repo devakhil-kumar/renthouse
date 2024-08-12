@@ -1,13 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { View, Text, Image, StyleSheet, useColorScheme, TouchableOpacity, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { lightTheme, darkTheme } from './theme';
 import property from '../../../assets/property.png'; // Default image
 import user from '../../../assets/user.png'; // Default image
-
+import { addRecentViewed } from '../../features/viewedPropertySlice'
+import { useDispatch, useSelector } from 'react-redux';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 const ListingItem = ({ item, onPress }) => {
+
+
+  
   const colorScheme = useColorScheme();
   const theme = colorScheme === 'dark' ? darkTheme : lightTheme;
+  
+
 
   return (
     <TouchableOpacity onPress={onPress} style={[styles.listingItem, { backgroundColor: theme.colors.card }]}>
@@ -33,11 +40,32 @@ const ListingItem = ({ item, onPress }) => {
 };
 
 const SearchList = ({ properties }) => {
+
+  const dispatch = useDispatch();
   const colorScheme = useColorScheme();
   const theme = colorScheme === 'dark' ? darkTheme : lightTheme;
   const [showAll, setShowAll] = useState(false);
-
+  const [userId, setUserId] = useState(null);
+  const { properties:viewedproperties, loading ,error } = useSelector((state) => state. viewedProperties);
   const navigation = useNavigation();
+  useEffect(() => {
+    const getUserId = async () => {
+      try {
+        const user = await AsyncStorage.getItem('user');
+        console.log('Stored user data:', user); // Log the user data
+        if (user) {
+          const parsedUser = JSON.parse(user);
+          // const storedUserId=parsedUser._id
+          console.log('Parsed user data:', parsedUser); // Log the parsed user data
+          setUserId(parsedUser._id);
+         
+        }
+      } catch (error) {
+        console.error('Failed to fetch user ID from AsyncStorage:', error);
+      }
+    };
+    getUserId();
+  }, []);
 
   // Ensure property mapping is correct
   const listings = properties.map(property => ({
@@ -57,8 +85,19 @@ const SearchList = ({ properties }) => {
   
   const displayedListings = showAll ? listings : listings.slice(0, 3);
   console.log(displayedListings, 'kkkk');
-  const handleListingPress = (item) => {
+  const handleListingPress = async(item) => {
     navigation.navigate('ApartmentScreen', { listing: item });
+    if (userId) {
+      const viewedPropertyData = { userId, propertyId: item.id }; // Adjust as needed
+      try {
+        await dispatch(addRecentViewed(viewedPropertyData)).unwrap();
+        // Handle success (e.g., show a success message or update local state)
+        console.log('Recent search added successfully');
+      } catch (error) {
+        // Handle error (e.g., show an error message)
+        console.error('Failed to add recent search:', error);
+      }
+    }
   };
   const toggleShowAll = () => {
     setShowAll(!showAll);

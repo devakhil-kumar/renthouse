@@ -16,7 +16,7 @@ import {
   List,
   IconButton,
 } from 'react-native-paper';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation,CommonActions } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Modal from 'react-native-modal';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
@@ -24,7 +24,7 @@ const {width} = Dimensions.get('window');
 import {useDispatch} from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import {logout, updateUser} from '../../features/authSlice';
+import {logoutUser, updateUser} from '../../features/authSlice';
 
 
 const ProfileScreen = () => {
@@ -70,9 +70,17 @@ const ProfileScreen = () => {
     getUserId();
   }, []);
 
-  const handleLogout = () => {
-    dispatch(logout());
-    console.log('Logout pressed');
+  
+  const handleLogout = async () => {
+    await dispatch(logoutUser());
+    
+    // Reset navigation
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [{ name: 'Auth' }], // Replace 'Login' with your initial route name
+      })
+    );
   };
 
 

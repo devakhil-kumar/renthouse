@@ -90,21 +90,7 @@ const RecentListings = () => {
 
   const { properties, loading, error } = useSelector((state) => state.properties);
 
-  // useEffect(() => {
-  //   const fetchAgentId = async () => {
-  //     try {
-  //       const userData = await AsyncStorage.getItem('user');
-  //       console.log("recentlisting",userData)
-  //       if (userData) {
-  //         const parsedData = JSON.parse(userData);
-  //         setAgentId(parsedData._id);
-  //       }
-  //     } catch (error) {
-  //       console.error('Failed to fetch agent ID from storage:', error);
-  //     }
-  //   };
-  //   fetchAgentId();
-  // }, []);
+ 
   useEffect(() => {
     const fetchProperties = async () => {
       const userData = await AsyncStorage.getItem('user');
