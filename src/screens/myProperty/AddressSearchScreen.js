@@ -78,7 +78,7 @@ const AddressSearchScreen = ({ navigation, route }) => {
         const { latitude, longitude } = position.coords;
         try {
           const response = await axios.get(
-            `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=AIzaSyARlogPc8tZDgm8MeT7Qc_pG8lcqJnCGvw`
+            `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=API_KEY`
           );
           const details = response.data.results[0];
           const fullAddress = details.formatted_address;
@@ -135,7 +135,7 @@ const AddressSearchScreen = ({ navigation, route }) => {
         placeholder="Search for an address"
         onPress={handleSelectAddress}
         query={{
-          key: 'AIzaSyARlogPc8tZDgm8MeT7Qc_pG8lcqJnCGvw',
+          key: 'API_KEY',
           language: 'en',
         }}
         styles={{
