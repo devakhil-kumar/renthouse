@@ -8,6 +8,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getProperties,deleteProperty } from '../../features/propertySlice'; 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { getAgentPropertiesCount } from '../../features/propertySlice';
 const ListingItem = ({ item, onPress, onEdit, onDelete }) => {
   const colorScheme = useColorScheme();
   const theme = colorScheme === 'dark' ? darkTheme : lightTheme;
@@ -26,7 +27,7 @@ const ListingItem = ({ item, onPress, onEdit, onDelete }) => {
   };
 
   return (
-    <TouchableOpacity onPress={onPress} style={[styles.listingItem, { backgroundColor: theme.colors.card }]}>
+    <TouchableOpacity onPress={onPress} style={[styles.listingItem, { backgroundColor: theme.colors.background }]}>
     <View style={styles.imageContainer}>
       <Image source={{ uri: item.image }} style={styles.image} />
     </View>
@@ -85,6 +86,7 @@ const RecentListings = () => {
   const theme = colorScheme === 'dark' ? darkTheme : lightTheme;
   const [showAll, setShowAll] = useState(false);
   const [agentId, setAgentId] = useState(null);
+  const [user, setUser] = useState(null);
   const dispatch = useDispatch();
   const navigation = useNavigation();
 
@@ -94,6 +96,7 @@ const RecentListings = () => {
   useEffect(() => {
     const fetchProperties = async () => {
       const userData = await AsyncStorage.getItem('user');
+      setUser(JSON.parse(userData));
       const parsedData = JSON.parse(userData);
       const agentId = parsedData?._id;
       if (agentId) {
@@ -105,7 +108,7 @@ const RecentListings = () => {
 
     fetchProperties();
   }, [dispatch]);
-
+  
 
   const handleEdit = (propertyId) => {
     // Find the property with the matching ID
@@ -115,125 +118,86 @@ const RecentListings = () => {
     }
   };
 
-  const handleDelete = (id) => {
-    // Implement delete functionality
-    dispatch(deleteProperty(id));
-    console.log('Delete item with id:', id);
+  // const handleDelete = (id) => {
+  //   // Implement delete functionality
+  //   dispatch(deleteProperty(id));
+  //   console.log('Delete item with id:', id);
+  // };
+  const handleDelete  = async (propertyId) => {
+    try {
+      // Dispatch an action to delete the property
+      await dispatch(deleteProperty(propertyId));
+      
+      // After deleting, fetch the updated properties count
+      dispatch(getAgentPropertiesCount(user._id));
+    } catch (error) {
+      console.error('Failed to delete property:', error);
+    }
   };
-  console.log("response recentlisting",properties)
+  // console.log("response recentlisting",properties)
   // useEffect(() => {
   //   dispatch(getProperties(agentId));
   // }, [dispatch]);
   if (loading) return <Text>Loading...</Text>;
-  if (error) return <Text>Error: {error}</Text>;
-  const listings = properties.map(property => ({
-    id: property._id,
-    image: property.mainImage || null, // Use a default image if not provided
-    rating: property.rating || 0,
-    title: property.title,
-    location: property.location?.address|| 'Location not available',
-    area: property.squareFeet || 0,
-    baths: property.bathrooms || 0,
-    bedrooms:property.bedrooms || 0,
-    price: property.price || 0,
-    type: property.type || 'Not specified',
-    images: property.images , // Use default if not provided
-    reviews: property.reviews || [] // Empty array if no reviews
-  }));
-  // const listings = [
-  //   {
-  //     id: properties[0]._id,
-  //     image: property,
-  //     rating: 4.9,
-  //     title: properties[0].title,
-  //     location: '1012 Ocean avenue, New york, USA',
-  //     area: 1.225,
-  //     baths: 3.0,
-  //     price: 340,
-      
-  //     type: 'Apartment',
-  //     images: [property, property, property], // Add paths to images
-  //   reviews: [
-  //     { text: 'Great place, very clean!', author: 'John Doe', rating:3,user:user ,helpfulCount:2},
-  //     { text: 'Amazing experience!', author: 'Jane Smith',rating:3,user:user,helpfulCount:2},
-  //     // Add more reviews as needed
-  //   ],
-  //   },
-  //   {
-  //     id: '2',
-  //     image: property,
-  //     rating: 4.9,
-  //     title: 'Woodland Apartment',
-  //     location: '1012 Ocean avenue, New york, USA',
-  //     area: 1.225,
-  //     baths: 3.0,
-  //     price: 340,
-  //     type: 'Apartment',
-  //     rating:3,
-  //     images: [property, property, property], // Add paths to images
-  //   reviews: [
-  //     { text: 'Very comfortable stay.', author: 'Alice Brown' ,rating:3 ,user:user,helpfulCount:2 },
-  //     { text: 'Would definitely come back!', author: 'Bob White', rating:3 ,user:user,helpfulCount:2},
-  //     // Add more reviews as needed
-  //   ],
-  //   },
-  //   {
-  //     id: '3',
-  //     image: property,
-  //     rating: 4.9,
-  //     title: 'Woodland Apartment',
-  //     location: '1012 Ocean avenue, New york, USA',
-  //     area: 1.225,
-  //     baths: 3.0,
-  //     price: 340,
-  //     type: 'Apartment',
-  //     rating:3,
-  //     images: [property, property, property], // Add paths to images
-  //   reviews: [
-  //     { text: 'Very comfortable stay.', author: 'Alice Brown' ,rating:3 ,user:user,helpfulCount:2 },
-  //     { text: 'Would definitely come back!', author: 'Bob White', rating:3 ,user:user,helpfulCount:2},
-  //     // Add more reviews as needed
-  //   ],
-  //   },
-  //   {
-  //     id: '4',
-  //     image: property,
-  //     rating: 4.9,
-  //     title: 'Woodland Apartment',
-  //     location: '1012 Ocean avenue, New york, USA',
-  //     area: 1.225,
-  //     baths: 3.0,
-  //     price: 340,
-  //     type: 'Apartment',
-  //     rating:3,
-  //     images: [property, property, property], // Add paths to images
-  //   reviews: [
-  //     { text: 'Very comfortable stay.', author: 'Alice Brown' ,rating:3 ,user:user,helpfulCount:2 },
-  //     { text: 'Would definitely come back!', author: 'Bob White', rating:3 ,user:user,helpfulCount:2},
-  //     // Add more reviews as needed
-  //   ],
-  //   },
-  //   {
-  //     id: '5',
-  //     image: property,
-  //     rating: 4.9,
-  //     title: 'Woodland Apartment',
-  //     location: '1012 Ocean avenue, New york, USA',
-  //     area: 1.225,
-  //     baths: 3.0,
-  //     price: 340,
-  //     type: 'Apartment',
-  //     rating:3,
-  //     images: [property, property, property], // Add paths to images
-  //   reviews: [
-  //     { text: 'Very comfortable stay.', author: 'Alice Brown' ,rating:3 ,user:user,helpfulCount:2 },
-  //     { text: 'Would definitely come back!', author: 'Bob White', rating:3 ,user:user,helpfulCount:2},
-  //     // Add more reviews as needed
-  //   ],
-  //   },
-  //   // Add more listing items as needed
-  // ];
+  // if (error) return <Text>Error: {error}</Text>;
+  // const listings = properties.map(property => ({
+  //   id: property._id,
+  //   image: property.mainImage || null, // Use a default image if not provided
+  //   rating: property.rating || 0,
+  //   title: property.title,
+  //   description:property.description || "No description about the property",
+  //   location: property.location?.address|| 'Location not available',
+
+  //   features: property?.features || [],
+  //   area: property.squareFeet || 0,
+  //   baths: property.bathrooms || 0,
+  //   bedrooms:property.bedrooms || 0,
+  //   price: property.price || 0,
+  //   type: property.type || 'Not specified',
+  //   images: property.images , // Use default if not provided
+  //   reviews: property.reviews || [] ,// Empty array if no reviews
+  //   category:property.category||"NA",
+  //   furnishedType:property.furnishedType||"null",
+  //   isGatedSociety: property.gatedSociety || false,
+  // isPetFriendly: property.petFriendly || false,
+  // preferredTenant: property.preferredTenant || 'Any',
+  // availableDate: property.nextAvailableDate || null, // Use null if not provided
+  // updatedDate: property.updatedAt || null, // Use null if not provided
+  // }));
+
+  const listings = properties.map(property => {
+    // Extract latitude and longitude from coordinates if available
+    const [latitude = null, longitude = null] = property.location?.coordinates || [];
   
+    return {
+      id: property._id,
+      image: property.mainImage || null, // Use a default image if not provided
+      rating: property.rating || 0,
+      title: property.title,
+      description: property.description || "No description about the property",
+      location: property.location?.address || 'Location not available',
+      city: property.location?.city || 'City not available',
+      state: property.location?.state || 'State not available',
+      country: property.location?.country || 'Country not available',
+      latitude: latitude, // Extracted latitude
+      longitude: longitude, // Extracted longitude
+      features: property.features || [],
+      area: property.squareFeet || 0,
+      baths: property.bathrooms || 0,
+      bedrooms: property.bedrooms || 0,
+      price: property.price || 0,
+      type: property.type || 'Not specified',
+      images: property.images || [], // Use default if not provided
+      reviews: property.reviews || [], // Empty array if no reviews
+      category: property.category || "NA",
+      furnishedType: property.furnishedType || "null",
+      isGatedSociety: property.gatedSociety || false,
+      isPetFriendly: property.petFriendly || false,
+      preferredTenant: property.preferredTenant || 'Any',
+      availableDate: property.nextAvailableDate || null, // Use null if not provided
+      updatedDate: property.updatedAt || null, // Use null if not provided
+    };
+  });
   const displayedListings = showAll ? listings : listings.slice(0, 3);
   const handleListingPress = (item) => {
     navigation.navigate('ApartmentScreen', { listing: item });
@@ -263,6 +227,7 @@ const RecentListings = () => {
 const styles = StyleSheet.create({
   container: {
     padding: 15,
+    backgroundColor: '#f5f5f5',
   },
   header: {
     flexDirection: 'row',
@@ -285,6 +250,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     flex: 1,
     position: 'relative',
+    elevation:5
   },
   imageContainer: {
     flex: 1/2,

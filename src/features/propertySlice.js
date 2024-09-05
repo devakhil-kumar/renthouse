@@ -3,7 +3,8 @@ import {
   addPropertyService, 
   updatePropertyService, 
   deletePropertyService, 
-  getPropertiesService 
+  getPropertiesService ,
+  getAgentPropertiesCountService
 } from '../api/service';
 
 // Thunks for async actions
@@ -63,10 +64,25 @@ export const getProperties = createAsyncThunk(
     }
   }
 );
+export const getAgentPropertiesCount= createAsyncThunk(
+  'properties/getAgentCount',
+  async (agentId, { rejectWithValue }) => {
+    
+    try {
+      const response = await getAgentPropertiesCountService(agentId);
+     console.log(response)
+      return response;
+    } catch (error) {
+      console.log(error)
+      return rejectWithValue(error.message);
+    }
+  }
+);
 
 const propertySlice = createSlice({
   name: 'properties',
   initialState: {
+    agentPropertiesCount: 0,
     properties: [],
     loading: false,
     error: null,
@@ -131,6 +147,17 @@ const propertySlice = createSlice({
         state.error = null;
       })
       .addCase(getProperties.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(getAgentPropertiesCount.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(getAgentPropertiesCount.fulfilled, (state, action) => {
+        state.loading = false;
+        state.agentPropertiesCount = action.payload.count;
+      })
+      .addCase(getAgentPropertiesCount.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });

@@ -22,8 +22,8 @@ export const updateAPI = (userData,ID) => {
     return axiosInstance.patch(`${API_ROUTES.UPDATE}/${ID}`, userData);
   };
   export const getUserDetail = (ID) => {
-    // console.log(userData)
-    return axiosInstance.patch(`${API_ROUTES.UPDATE}/${ID}`);
+    console.log(`${API_ROUTES.USERDETAIL}/${ID}`)
+    return axiosInstance.get(`${API_ROUTES.USERDETAIL}/${ID}`);
   };
   export const getOTP = (email) => {
     console.log(API_ROUTES.GETOTP)
@@ -33,6 +33,7 @@ export const updateAPI = (userData,ID) => {
 // Add more API functions as needed for authentication
 // Property APIs
 export const addPropertyAPI = (propertyData) => {
+ 
   return axiosInstance.post(API_ROUTES.ADD_PROPERTY, propertyData);
 };
 
@@ -98,7 +99,42 @@ export const addFavoritePropertyAPI = (viewedPropertyData) => {
   return axiosInstance.post(API_ROUTES.ADD_FAVORITE_PROPERTY, viewedPropertyData);
 };
 
-// Get Viewed Properties
+// Getfav Properties
 export const getFavoritePropertiesAPI = (userId) => {
   return axiosInstance.get(`${API_ROUTES.GET_FAVORITE_PROPERTIES}?userId=${userId}`);
+};
+
+export const deleteFavoritePropertyAPI = (userId, propertyId) => {
+  return axiosInstance.delete(`${API_ROUTES.DELETE_FAVORITE_PROPERTIES}/${propertyId}`, {
+    data: { userId }
+  });
+};
+
+
+export const getFavoritePropertiesIDAPI = (userId) => {
+  return axiosInstance.get(`${API_ROUTES.GET_FAVORITE_PROPERTIES_Id}?userId=${userId}`);
+};
+
+
+export const createNotificationAPI = (notificationData) => {
+  return axiosInstance.post(API_ROUTES.CREATE_NOTIFICATION, notificationData);
+};
+
+export const getAgentNotificationsAPI = (agentId, status) => {
+  return axiosInstance.get(`${API_ROUTES.GET_AGENT_NOTIFICATIONS}/${agentId}${status ? `?status=${status}` : ''}`);
+};
+
+export const markNotificationAsReadAPI = (notificationId) => {
+  return axiosInstance.patch(`${API_ROUTES.MARK_NOTIFICATION_READ}/${notificationId}/read`);
+};
+
+export const getUnreadNotificationCountAPI = (agentId) => {
+  
+  return axiosInstance.get(`${API_ROUTES.GET_UNREAD_NOTIFICATION_COUNT}/${agentId}/unread-count`);
+};
+
+
+export const getAgentPropertiesCountAPI = (agentId) => {
+  console.log(`${API_ROUTES.GET_AGENT_PROPERTIES_COUNT}/${agentId}`)
+  return axiosInstance.get(`${API_ROUTES.GET_AGENT_PROPERTIES_COUNT}/${agentId}`);
 };

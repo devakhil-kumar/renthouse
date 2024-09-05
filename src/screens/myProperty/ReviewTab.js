@@ -79,6 +79,22 @@ console.log(listing)
       color: colors.white,
       fontWeight: 'bold',
     },
+    noReviewContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 20,
+    },
+    noReviewIcon: {
+      fontSize: 80,
+      color: colors.primary,
+      marginBottom: 20,
+    },
+    noReviewText: {
+      fontSize: 18,
+      color: colors.text,
+      textAlign: 'center',
+    },
   });
 
   const Review = ({ review }) => {
@@ -102,23 +118,36 @@ console.log(listing)
           ))}
           <Text style={styles.rating}>{review?.rating}</Text>
         </View>
-        <TouchableOpacity
+        {/* <TouchableOpacity
           style={[styles.helpfulButton, helpful && styles.helpfulButtonActive]}
           onPress={() => setHelpful(!helpful)}
         >
           <Text style={styles.helpfulButtonText}>
             Helpful {helpful ? '✓' : ''} ({review.helpfulCount})
           </Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
     );
   };
 
+  const NoReviews = () => (
+    <View style={styles.noReviewContainer}>
+      <Icon name="comment-text-outline" style={styles.noReviewIcon} />
+      <Text style={styles.noReviewText}>
+        No reviews yet. Be the first to share your experience!
+      </Text>
+    </View>
+  );
+
   return (
-    <ScrollView style={styles.reviewContainer}>
-      {listing.reviews.map((review, index) => (
-        <Review key={index} review={review} />
-      ))}
+   <ScrollView style={styles.reviewContainer}>
+      {listing.reviews && listing.reviews.length > 0 ? (
+        listing.reviews.map((review, index) => (
+          <Review key={index} review={review} />
+        ))
+      ) : (
+        <NoReviews />
+      )}
     </ScrollView>
   );
 };

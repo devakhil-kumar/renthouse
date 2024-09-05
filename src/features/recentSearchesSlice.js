@@ -55,7 +55,7 @@ const recentSearchesSlice = createSlice({
       })
       .addCase(addRecentSearch.fulfilled, (state, action) => {
         state.loading = false;
-        state.recentSearches.push(action.payload);
+        // state.recentSearches.push(action.payload);
       })
       .addCase(addRecentSearch.rejected, (state, action) => {
         state.loading = false;

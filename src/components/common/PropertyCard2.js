@@ -6,13 +6,18 @@ import { lightTheme, darkTheme } from './theme';
 const { width } = Dimensions.get('window');
 const cardWidth = (width - 70) / 2;
 
-const PropertyCard2 = ({ property, onPress, style }) => {
+const PropertyCard2 = ({ property, onPress,  onDelete,style }) => {
   const colorScheme = useColorScheme();
   const theme = colorScheme === 'dark' ? darkTheme : lightTheme;
   const handlePress = () => {
     console.log("Property pressed:", property);
     if (onPress) {
       onPress(property);
+    }
+  };
+  const handleDelete = () => {
+    if (onDelete) {
+      onDelete(property.id);
     }
   };
   return (
@@ -24,7 +29,9 @@ const PropertyCard2 = ({ property, onPress, style }) => {
       <Text style={[styles.address, { color: theme.colors.text }]}>{property?.location}</Text>
     </View>
     <View style={styles.bookmarkButton}>
-      <Icon name="bookmark-outline" size={24} color={theme.colors.primary} />
+    <TouchableOpacity style={styles.bookmarkButton} onPress={handleDelete}>
+        <Icon name="cancel" size={24} color={theme.colors.primary}  />
+      </TouchableOpacity>
     </View>
   </View>
   );
@@ -60,8 +67,12 @@ const styles = StyleSheet.create({
   },
   bookmarkButton: {
     position: 'absolute',
-    top: 10,
-    right: 10,
+    top: 2,
+    right: 2,
+    //    width: 
+    borderRadius: 12, // Half of the width/height to make it round
+   
+    backgroundColor: '#FFFFFF',
   },
 });
 

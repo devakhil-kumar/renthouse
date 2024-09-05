@@ -1,4 +1,4 @@
-import React, { useState ,useEffect} from 'react';
+import React, { useState ,useEffect, useRef} from 'react';
 import { View, ScrollView, StyleSheet, Text, TouchableOpacity, useColorScheme , Image, FlatList } from 'react-native';
 import { lightTheme, darkTheme } from '../../components/common/theme';
 import CustomInput from '../../components/common/CustomInput';
@@ -8,13 +8,31 @@ import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Modal from 'react-native-modal';
 import {request, PERMISSIONS} from 'react-native-permissions';
+import * as Yup from 'yup';
+import CustomInputAddress from '../../components/common/CustomInputAddress';
+
+
+const validationSchema = Yup.object().shape({
+  title: Yup.string().required('Property Title is required'),
+  fullAddress: Yup.string().required('Full Address is required'),
+  bedrooms: Yup.string().required('Number of Bedrooms is required'),
+  bathrooms: Yup.string().required('Number of Bathrooms is required'),
+  squareFeet: Yup.number().positive('Square feet must be a positive number').required('Square feet is required'),
+  price: Yup.number().positive('Price must be a positive number').required('Price is required'),
+  description: Yup.string().required('Description is required'),
+  images: Yup.array().min(2, 'At least 2 images are required').required('Images are required'),
+  // Add other field validations as needed
+});
 
 export default function AddPropertyStep1({ route, navigation }) {
   const colorScheme = useColorScheme();
+  const scrollViewRef = useRef(null);
+  const [scrollToError, setScrollToError] = useState(false);
+  const inputRefs = useRef({});
   const theme = colorScheme === 'dark' ? darkTheme : lightTheme;
   const { propertyToEdit } = route.params || {};
-  console.log({propertyToEdit})
-
+  // console.log({propertyToEdit})
+  const [fieldPositions, setFieldPositions] = useState({});
   const isEditing = !!propertyToEdit;
   const requestCameraPermission = async () => {
     try {
@@ -38,13 +56,18 @@ export default function AddPropertyStep1({ route, navigation }) {
   const [formData, setFormData] = useState({
     title: '',
     fullAddress: '',
+    city: '',
+    state: '',
+    country:'',
+    zipCode:'',
+    coordinates:[null,null],
     bedrooms: '1',
     bathrooms: '1',
     floorNumber: 'Ground Floor',
-    squareFeet: '',
+    squareFeet: null,
     category: '1BHK',
     furnishedType: 'Fully Furnished',
-    price: '',
+    price: null,
     brokerage: 'Brokerage estimation',
     preferredTenant: 'All',
     parking: '0',
@@ -53,6 +76,19 @@ export default function AddPropertyStep1({ route, navigation }) {
     images: [],
     
   });
+  const [errors, setErrors] = useState({});
+  const [touchedFields, setTouchedFields] = useState({});
+console.log(Object.keys(errors)[0],"erororroro")
+
+useEffect(() => {
+  if (route.params?.selectedAddress) {
+    setFormData(prevState => ({
+      ...prevState,
+      ...route.params.selectedAddress,
+      coordinates: route.params.selectedAddress.coordinates || [null, null],
+    }));
+  }
+}, [route.params?.selectedAddress]);
 
   useEffect(() => {
     if (isEditing) {
@@ -77,11 +113,77 @@ export default function AddPropertyStep1({ route, navigation }) {
   }, [isEditing, propertyToEdit]);
 
 
- 
-
+  
   const handleChange = (name, value) => {
     setFormData(prevState => ({ ...prevState, [name]: value }));
+    // setTouchedFields(prevState => ({ ...prevState, [name]: true }));
+    setErrors(prevErrors => ({ ...prevErrors, [name]: undefined })); // Clear error for this field
   };
+  
+  const validateForm = async () => {
+    try {
+      await validationSchema.validate(formData, { abortEarly: false });
+      setErrors({});
+      return true;
+    } catch (yupError) {
+      const newErrors = {};
+      yupError.inner.forEach(error => {
+        newErrors[error.path] = error.message;
+      });
+      setErrors(newErrors);
+      return false;
+    }
+  };
+
+  
+  const updateFieldPosition = (name, layout) => {
+    setFieldPositions(prev => ({
+      ...prev,
+      [name]: layout.y
+    }));
+  };
+  
+  
+ 
+const handleNext = async () => {
+  const isValid = await validateForm();
+
+  if (isValid) {
+    const serializedFormData = {
+      ...formData,
+      nextAvailableDate: formData.nextAvailableDate.toISOString(), // Convert Date to string
+    };
+    navigation.navigate('AddPropertyScreen2', {
+      formData: serializedFormData,
+      isEditing,
+      propertyId: propertyToEdit?._id,
+    });
+  } else {
+    // Update the errors state
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      // Add your validation errors here
+    }));
+
+    // Trigger the scroll after updating the errors
+    setScrollToError(true);
+  }
+};
+ 
+ // useEffect to handle scrolling after errors state is updated
+useEffect(() => {
+  if (scrollToError) {
+    const firstErrorField = Object.keys(errors)[0];
+    if (firstErrorField && fieldPositions[firstErrorField] !== undefined) {
+      scrollViewRef.current?.scrollTo({
+        y: fieldPositions[firstErrorField] - 50, // 50px offset
+        animated: true,
+      });
+    }
+    // Reset the scroll trigger state
+    setScrollToError(false);
+  }
+}, [scrollToError, errors, fieldPositions]);
 
   const openCamera = () => {
     const options = {
@@ -115,7 +217,7 @@ export default function AddPropertyStep1({ route, navigation }) {
       }
     });
   };
-  console.log(formData)
+  // console.log(formData)
 
   const pickImage = (useCamera) => {
     if (useCamera) {
@@ -165,8 +267,24 @@ export default function AddPropertyStep1({ route, navigation }) {
     </TouchableOpacity>
   );
 
+  const renderErrorMessage = () => {
+    const firstError = Object.values(errors)[0];
+    if (firstError) {
+      return (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>{firstError}</Text>
+        </View>
+      );
+    }
+    return null;
+  };
+
   return (
-    <ScrollView style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <ScrollView 
+    ref={scrollViewRef}
+    style={[styles.container, { backgroundColor: theme.colors.background }]}
+    contentContainerStyle={styles.contentContainer}
+  >
       <View style={styles.imagePickerButtons}>
       <TouchableOpacity
         style={[styles.imageUploader, { borderColor: theme.colors.secondary }]}
@@ -192,13 +310,19 @@ export default function AddPropertyStep1({ route, navigation }) {
         onChangeText={(value) => handleChange('title', value)}
         inputStyle={{ color: theme.colors.text }}
         placeholderTextColor={theme.colors.secondary}
+        error={errors.title}
+        // ref={(ref) => (inputRefs.current.title = ref)}
+        onLayout={(event) => updateFieldPosition('title', event.nativeEvent.layout)}
       />
-      <CustomInput
+      <CustomInputAddress
         label="Full Address"
         value={formData.fullAddress}
         onChangeText={(value) => handleChange('fullAddress', value)}
         inputStyle={{ color: theme.colors.text }}
         placeholderTextColor={theme.colors.secondary}
+        error={errors.fullAddress}
+        // ref={(ref) => (inputRefs.current.fullAddress = ref)}
+        onLayout={(event) => updateFieldPosition('fullAddress', event.nativeEvent.layout)}
       />
 
       <View style={styles.row}>
@@ -214,7 +338,7 @@ export default function AddPropertyStep1({ route, navigation }) {
           label="No of Bathrooms"
           value={formData.bathrooms}
           onValueChange={(value) => handleChange('bathrooms', value)}
-          items={['1', '2', '3', '4', '5+']}
+          items={['1', '2', '3', '4', '5']}
           containerStyle={[styles.halfWidth, { borderColor: theme.colors.secondary }]}
           textStyle={{ color: theme.colors.text }}
         />
@@ -224,7 +348,7 @@ export default function AddPropertyStep1({ route, navigation }) {
         label="Floor number"
         value={formData.floorNumber}
         onValueChange={(value) => handleChange('floorNumber', value)}
-        items={['Ground Floor', '1', '2', '3', '4', '5+']}
+        items={['Ground Floor', '1', '2', '3', '4', '5']}
         containerStyle={{ borderColor: theme.colors.secondary }}
         textStyle={{ color: theme.colors.text }}
       />
@@ -237,16 +361,32 @@ export default function AddPropertyStep1({ route, navigation }) {
         placeholder="Enter sq ft"
         inputStyle={{ color: theme.colors.text }}
         placeholderTextColor={theme.colors.secondary}
+        error={errors.squareFeet}
+        // ref={(ref) => (inputRefs.current.squareFeet = ref)}
+        onLayout={(event) => updateFieldPosition('squareFeet', event.nativeEvent.layout)}
       />
 
-      <CustomDropdown
-        label="Category"
-        value={formData.category}
-        onValueChange={(value) => handleChange('category', value)}
-        items={['1BHK', '2BHK', '3BHK', '4BHK', '5BHK+']}
-        containerStyle={{ borderColor: theme.colors.secondary }}
-        textStyle={{ color: theme.colors.text }}
-      />
+<CustomDropdown
+  label="Category"
+  value={formData.category}
+  onValueChange={(value) => handleChange('category', value)}
+  items={[
+    '1BHK', 
+    '2BHK', 
+    '3BHK', 
+    '4BHK', 
+    '5BHK+', 
+    'Single Room', 
+    'Double Room', 
+    'Shared Room', 
+    'Office Space', 
+    'Shop', 
+    'Warehouse', 
+    'Showroom'
+  ]}
+  // containerStyle={{ borderColor: theme.colors.secondary }}
+  textStyle={{ color: theme.colors.text }}
+/>
 
       <CustomDropdown
         label="Furnished Type"
@@ -265,6 +405,9 @@ export default function AddPropertyStep1({ route, navigation }) {
         placeholder="Price estimation"
         inputStyle={{ color: theme.colors.text }}
         placeholderTextColor={theme.colors.secondary}
+        error={errors.price}
+        // ref={(ref) => (inputRefs.current.price = ref)}
+        onLayout={(event) => updateFieldPosition('price', event.nativeEvent.layout)}
       />
 
       <View style={styles.row}>
@@ -321,11 +464,14 @@ export default function AddPropertyStep1({ route, navigation }) {
         placeholder="Short Description of the Property"
         inputStyle={{ color: theme.colors.text }}
         placeholderTextColor={theme.colors.secondary}
+        error={errors.description}
+        // ref={(ref) => (inputRefs.current.description = ref)}
+        onLayout={(event) => updateFieldPosition('description', event.nativeEvent.layout)}
       />
-
-      <TouchableOpacity
+ {renderErrorMessage()}
+<TouchableOpacity
         style={[styles.button, { backgroundColor: theme.colors.primary }]}
-        onPress={() => navigation.navigate('AddPropertyScreen2', {  formData, isEditing, propertyId: propertyToEdit?._id  })}
+        onPress={handleNext}
       >
         <Text style={styles.buttonText}>Next</Text>
       </TouchableOpacity>
@@ -439,5 +585,18 @@ const styles = StyleSheet.create({
   fullImage: {
     width: '100%',
     height: 300,
+  },
+  errorContainer: {
+    backgroundColor: '#ffebee',
+    padding: 10,
+    marginBottom: 10,
+    borderRadius: 5,
+  },
+  errorText: {
+    color: '#d32f2f',
+    fontSize: 14,
+  },
+  inputError: {
+    borderColor: '#d32f2f',
   },
 });

@@ -65,6 +65,19 @@ export const fetchUserDetails = createAsyncThunk(
     }
   }
 );
+export const fetchAgentDetails = createAsyncThunk(
+  'auth/fetchAgentDetails',
+  async (ID, { rejectWithValue }) => {
+    try {
+      const response = await getUserDetailService(ID);
+      console.log(response)
+      return response; // Return user details to update state
+    } catch (error) {
+      console.log(error)
+      return rejectWithValue(error.message);
+    }
+  }
+);
 
 export const loadInitialState = createAsyncThunk(
   'auth/loadInitialState',
@@ -90,6 +103,7 @@ export const loadInitialState = createAsyncThunk(
 const initialState = {
   isLoggedIn:  false, 
   user:  null,
+  Agent:null,
   userRole: null,  // Add userRole to the state
   loading: false,
   error: null,
@@ -194,6 +208,19 @@ const authSlice = createSlice({
       state.error = null;
     });
     builder.addCase(fetchUserDetails.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload || 'Failed to fetch user details.';
+    });
+    builder.addCase(fetchAgentDetails.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    });
+    builder.addCase(fetchAgentDetails.fulfilled, (state, action) => {
+      state.Agent = action.payload.user; // Assuming the API returns user detail
+      state.loading = false;
+      state.error = null;
+    });
+    builder.addCase(fetchAgentDetails.rejected, (state, action) => {
       state.loading = false;
       state.error = action.payload || 'Failed to fetch user details.';
     });

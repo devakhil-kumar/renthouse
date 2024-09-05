@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "904581734360",
+    "project_id": "realestate-1aeb9",
+    "storage_bucket": "realestate-1aeb9.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:904581734360:android:b771d664f3f077eaa7dcad",
+        "android_client_info": {
+          "package_name": "com.renthouse"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBHRy-9hw2Nw6qWEScwdSD5W2TUBZWeu2s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

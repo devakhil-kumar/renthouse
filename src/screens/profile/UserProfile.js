@@ -1,8 +1,9 @@
 import React, { useState,useEffect } from 'react';
 import { 
   View, Text, TextInput, TouchableOpacity, Image, 
-  ScrollView, StyleSheet, useColorScheme 
+  ScrollView, StyleSheet, useColorScheme ,Alert
 } from 'react-native';
+import Toast from 'react-native-toast-message';
 import user from "../../../assets/user.png"
 import { useDispatch } from 'react-redux';
 import {logoutUser, updateUser} from '../../features/authSlice';
@@ -11,9 +12,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const UserProfile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [avatarUri, setAvatarUri] = useState(null);
+  const [errors, setErrors] = useState({});
   const [userData, setUserData] = useState({
     name: 'William Savastan',
     email: 'WilliamS@email.com',
+    phone:"",
     // licenseNumber: '',
     // stateOfLicensure: '',
     // yearsOfExperience: '',
@@ -37,7 +40,7 @@ const UserProfile = () => {
             name: parsedUser.name || '',
             email: parsedUser.email || '',
             // licenseNumber: parsedUser.licenseNumber || '',
-            // stateOfLicensure: parsedUser.stateOfLicensure || '',
+            phone: parsedUser.phone || '',
             // yearsOfExperience: parsedUser.yearsOfExperience || '',
             // agency: parsedUser.agency || '',
             // officeAddress: parsedUser.officeAddress || '',
@@ -53,22 +56,115 @@ const UserProfile = () => {
     loadUserData();
   }, []);
 
+  
+  const validateEmail = (email) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(String(email).toLowerCase());
+  };
+
+  const validatePhone = (phone) => {
+    return phone.length === 10 && /^\d+$/.test(phone);
+  };
+
+  const validateName = (name) => {
+    return name.trim().length > 0;
+  };
+  // const handleUpdate = async () => {
+  //   if (isEditing) {
+  //     let newErrors = {};
+
+  //     if (!validateName(userData.name)) {
+  //       newErrors.name = 'Name cannot be empty';
+  //     }
+
+  //     if (!validateEmail(userData.email)) {
+  //       newErrors.email = 'Invalid email address';
+  //     }
+
+  //     if (userData.phone && !validatePhone(userData.phone)) {
+  //       newErrors.phone = 'Phone number must be 10 digits';
+  //     }
+
+  //     if (Object.keys(newErrors).length > 0) {
+  //       setErrors(newErrors);
+  //       return;
+  //     }
+
+  //     try {
+  //       const user = await AsyncStorage.getItem('user');
+  //       if (user) {
+  //         const parsedUser = JSON.parse(user);
+  //         const ID = parsedUser._id;
+  //         if (ID) {
+  //           dispatch(updateUser({ ID, userData }));
+  //           Alert.alert('Success', 'Profile updated successfully');
+  //         }
+  //       }
+  //     } catch (error) {
+  //       console.error('Failed to update user data:', error);
+  //       Alert.alert('Error', 'Failed to update profile');
+  //     }
+  //   }
+  //   setIsEditing(!isEditing);
+  //   setErrors({});
+  // };
+
   const handleUpdate = async () => {
     if (isEditing) {
+      let newErrors = {};
+  
+      if (!validateName(userData.name)) {
+        newErrors.name = 'Name cannot be empty';
+      }
+  
+      if (!validateEmail(userData.email)) {
+        newErrors.email = 'Invalid email address';
+      }
+  
+      if (userData.phone && !validatePhone(userData.phone)) {
+        newErrors.phone = 'Phone number must be 10 digits';
+      }
+  
+      if (Object.keys(newErrors).length > 0) {
+        setErrors(newErrors);
+        return;
+      }
+  
       try {
         const user = await AsyncStorage.getItem('user');
         if (user) {
           const parsedUser = JSON.parse(user);
           const ID = parsedUser._id;
           if (ID) {
-            dispatch(updateUser({ ID, userData }));
+            await dispatch(updateUser({ ID, userData })).unwrap();
+            // Alert.alert('Success', 'Profile updated successfully');
+            Toast.show({
+              type: 'success',
+              text1: 'Profile Updated',
+              text2: 'Your profile was updated successfully.',
+              visibilityTime: 3000,
+              autoHide: true,
+              topOffset: 30,
+              bottomOffset: 40,
+            });
           }
         }
       } catch (error) {
-        console.error('Failed to update user data:', error);
+       
+        
+        Toast.show({
+          type: 'error',
+          text1: 'Update Failed',
+          text2: 'Failed to update profile. Please try again later.',
+          visibilityTime: 3000,
+          autoHide: true,
+          topOffset: 30,
+          bottomOffset: 40,
+        });
       }
     }
     setIsEditing(!isEditing);
+    setErrors({});
   };
 
   const renderField = (label, key, secureTextEntry = false) => (
@@ -78,14 +174,20 @@ const UserProfile = () => {
         style={[
           styles.input,
           isDarkMode && styles.darkInput,
-          !isEditing && styles.disabledInput
+          !isEditing && styles.disabledInput,
+          errors[key] && styles.errorInput
         ]}
         value={userData[key]}
-        onChangeText={(text) => setUserData({...userData, [key]: text})}
+        onChangeText={(text) => {
+          setUserData({...userData, [key]: text});
+          setErrors({...errors, [key]: null});
+        }}
         editable={isEditing}
         secureTextEntry={secureTextEntry}
       />
+      {errors[key] && <Text style={styles.errorText}>{errors[key]}</Text>}
     </View>
+  
   );
 
   return (
@@ -105,8 +207,9 @@ const UserProfile = () => {
 
       {renderField('User Name', 'name')}
       {renderField('Email', 'email')}
+      {renderField('Phone Number', 'phone')}
       {/* {renderField('License Number', 'licenseNumber')}
-      {renderField('State of Licensure', 'stateOfLicensure')}
+  
       {renderField('Years of Experience', 'yearsOfExperience')}
       {renderField('Agency', 'agency')}
       {renderField('Office Address', 'officeAddress')} */}
@@ -197,6 +300,14 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  errorInput: {
+    borderColor: 'red',
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 12,
+    marginTop: 5,
   },
 });
 

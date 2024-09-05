@@ -12,7 +12,7 @@ const initialState = {
 export const searchProperties = createAsyncThunk(
   'properties/searchProperties',
   async (queryParams, { rejectWithValue }) => {
-    // console.log({queryParams})
+    console.log({queryParams})
     try {
       const response = await searchPropertiesService(queryParams);
       // console.log(response)

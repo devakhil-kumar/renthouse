@@ -4,12 +4,15 @@ import MapView, { Marker } from 'react-native-maps';
 import { useTheme } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
-const Address = ({ address, latitude, longitude }) => {
+const Address = ({ address ,latitude,longitude,onViewMapPress }) => {
+  // const latitude = 37.78825;
+  // const longitude = -122.4324;
+  console.log({latitude,longitude})
   const { colors } = useTheme();
 
   const styles = StyleSheet.create({
     container: {
-      padding: 15,
+      paddingTop:15 ,
       backgroundColor: colors.background,
     },
     header: {
@@ -42,6 +45,7 @@ const Address = ({ address, latitude, longitude }) => {
     },
     mapContainer: {
       height: 200,
+      marginBottom:100,
       borderRadius: 10,
       overflow: 'hidden',
     },
@@ -55,7 +59,7 @@ const Address = ({ address, latitude, longitude }) => {
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Address</Text>
-        <Text style={styles.viewMapText}>View on Map</Text>
+        {/* <Text style={styles.viewMapText}>View on Map</Text> */}
       </View>
       <View style={styles.addressContainer}>
         <Icon 
@@ -67,7 +71,7 @@ const Address = ({ address, latitude, longitude }) => {
         <Text style={styles.addressText}>{address}</Text>
       </View>
       <View style={styles.mapContainer}>
-        {/* <MapView
+        <MapView
           style={styles.map}
           initialRegion={{
             latitude,
@@ -82,7 +86,7 @@ const Address = ({ address, latitude, longitude }) => {
           >
             <Icon name="home" size={30} color={colors.primary} />
           </Marker>
-        </MapView> */}
+        </MapView>
       </View>
     </View>
   );

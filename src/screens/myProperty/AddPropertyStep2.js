@@ -13,7 +13,14 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { useDispatch } from 'react-redux';
 import { addProperty,updateProperty } from '../../features/propertySlice';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Yup from 'yup';
 
+
+const validationSchema = Yup.object().shape({
+  propertyType: Yup.string().required('Property type is required'),
+  
+  // amenities: Yup.array().min(1, 'Please select at least one amenity'),
+});
 
 export default function AddPropertyStep2({route, navigation}) {
   const colorScheme = useColorScheme();
@@ -21,11 +28,12 @@ export default function AddPropertyStep2({route, navigation}) {
   const { formData: step1Data, isEditing, propertyId } = route.params;
   // console.log(propertyId,"hdshhfhdjhjsdhjfhsjd")
   const [user, setUser] = useState(null);
+  const [formErrors, setFormErrors] = useState({});
   const [formData, setFormData] = useState({
     propertyType: '',
-    rentNegotiable: null,
-    petFriendly: null,
-    gatedSociety: null,
+    rentNegotiable: false,
+    petFriendly: false,
+    gatedSociety: false,
     amenities: [],
   });
 // console.log({user})
@@ -46,7 +54,7 @@ export default function AddPropertyStep2({route, navigation}) {
     fetchUser();
     if (isEditing) {
       setFormData({
-       type: step1Data.type || '',
+        propertyType: step1Data.type || '',
         rentNegotiable: step1Data.rentNegotiable || null,
         petFriendly: step1Data.petFriendly || null,
         gatedSociety: step1Data.gatedSociety || null,
@@ -54,7 +62,20 @@ export default function AddPropertyStep2({route, navigation}) {
       });
     }
   }, []);
-
+  const validateForm = async () => {
+    try {
+      await  validationSchema.validate(formData, { abortEarly: false });
+      setFormErrors({}); // Clear errors if validation passes
+      return true;
+    } catch (err) {
+      const errors = {};
+      err.inner.forEach((error) => {
+        errors[error.path] = error.message;
+      });
+      setFormErrors(errors);
+      return false;
+    }
+  };
   const handleRadioChange = (name, value) => {
     setFormData(prevState => ({...prevState, [name]: value}));
   };
@@ -67,19 +88,26 @@ export default function AddPropertyStep2({route, navigation}) {
         : [...prevState.amenities, amenity],
     }));
   };
-
+  console.log(step1Data,"step")
   const handleSubmit = async () => {
     if (!user) {
       console.error('User data not available');
       // Handle the case where user data is not available
       return;
     }
-  
+     const isValid = await validateForm();
+  if (!isValid) {
+    return;
+  }
+
     const finalData = {
       ...step1Data,
       ...formData,
+      nextAvailableDate: step1Data.nextAvailableDate
+        ? new Date(step1Data.nextAvailableDate)
+        : null, // Handling date properly
     };
-    // console.log({finalData})
+    console.log({finalData})
     // Transform the data to match the desired format
     const transformedData = {
       title: finalData.title || "Untitled Property", // You might want to generate a title based on some criteria
@@ -90,15 +118,16 @@ export default function AddPropertyStep2({route, navigation}) {
       price: parseInt(finalData.price) || 0,
       description: finalData.description || "No description provided",
       features: finalData.amenities || [],
+      category:finalData.category,
       status: false ,
       location: {
         type: "Point",
-        coordinates: [0, 0], // You'll need to get actual coordinates
+        coordinates: finalData.coordinates||[0, 0], // You'll need to get actual coordinates
         address: finalData.fullAddress || "",
-        city: finalData.locality || "dfads",
-        state: "fdsfg", // You'll need to add this to your form if required
-        zip: "5555", // You'll need to add this to your form if required
-        country: "India" // Assuming the property is in India
+        city: finalData.city || "dfads",
+        state: finalData.state||"fdsfg", // You'll need to add this to your form if required
+        zip: finalData.zipCode||"5555", // You'll need to add this to your form if required
+        country: finalData.country||"India" // Assuming the property is in India
       },
       agentId: user._id, // Assuming the user object has an id field
       images: finalData.images, 
@@ -156,14 +185,14 @@ export default function AddPropertyStep2({route, navigation}) {
     }
   };
 
-  const RadioButton = ({label, name, value, selectedValue}) => (
+  const RadioButton = ({label, name, value, selectedValue, error}) => (
     <TouchableOpacity
       style={styles.radioButton}
       onPress={() => handleRadioChange(name, value)}>
       <View
         style={[
           styles.radio,
-          {borderColor: theme.colors.primary},
+          {borderColor: error ? 'red' : theme.colors.primary},
           selectedValue === value && {backgroundColor: theme.colors.primary},
         ]}
       />
@@ -194,35 +223,42 @@ export default function AddPropertyStep2({route, navigation}) {
   return (
     <ScrollView
       style={[styles.container, {backgroundColor: theme.colors.background}]}>
-      <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>
-        Type of Property
-      </Text>
-      <View style={styles.radioGroup}>
-        <RadioButton
-          label="House"
-          name="propertyType"
-          value="House"
-          selectedValue={formData.propertyType}
-        />
-        <RadioButton
-          label="Appartment"
-          name="propertyType"
-          value="Appartment"
-          selectedValue={formData.propertyType}
-        />
-        <RadioButton
-          label="Townhouse"
-          name="propertyType"
-          value="studentAllowed"
-          selectedValue={formData.propertyType}
-        />
-        <RadioButton
-          label="Room Set"
-          name="propertyType"
-          value="RoomSet"
-          selectedValue={formData.propertyType}
-        />
-      </View>
+     <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>
+  Type of Property
+</Text>
+<View style={styles.radioGroup}>
+  <RadioButton
+    label="House"
+    name="propertyType"
+    value="House"
+    selectedValue={formData.propertyType}
+    error={formErrors.propertyType}
+  />
+  <RadioButton
+    label="Apartment"
+    name="propertyType"
+    value="Apartment"
+    selectedValue={formData.propertyType}
+    error={formErrors.propertyType}
+  />
+  <RadioButton
+    label="Commercial"
+    name="propertyType"
+    value="Commercial"
+    selectedValue={formData.propertyType}
+    error={formErrors.propertyType}
+  />
+  <RadioButton
+    label="Room Set"
+    name="propertyType"
+    value="RoomSet"
+    selectedValue={formData.propertyType}
+    error={formErrors.propertyType}
+  />
+</View>
+{formErrors.propertyType && (
+  <Text style={styles.errorText}>{formErrors.propertyType}</Text>
+)}
 
       {/* <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>
         Is rent negotiable?
@@ -301,8 +337,23 @@ export default function AddPropertyStep2({route, navigation}) {
           onToggle={handleAmenityToggle}
         />
         <CheckBox
-          label="Power Backup/ Inverter"
+          label="Power Backup"
           value="powerBackup"
+          onToggle={handleAmenityToggle}
+        />
+        <CheckBox
+          label="Gym & Fit"
+          value="gym&fit"
+          onToggle={handleAmenityToggle}
+        />
+        <CheckBox
+          label="Car Parking"
+          value="parking"
+          onToggle={handleAmenityToggle}
+        />
+           <CheckBox
+          label="Swimming Pool"
+          value="pool"
           onToggle={handleAmenityToggle}
         />
       </View>
@@ -331,13 +382,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    marginBottom: 20,
+    // marginBottom: 5,
   },
   radioButton: {
     flexDirection: 'row',
     alignItems: 'center',
     width: '48%', // Adjust to create two columns
-    marginBottom: 10,
+    marginBottom: 20,
   },
   radio: {
     height: 24,
@@ -384,5 +435,10 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 14,
+    marginTop: 5,
   },
 });

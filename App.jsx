@@ -10,11 +10,17 @@ import AppNavigator from './src/navigation/AppNavigator';
 import { loadInitialState } from './src/features/authSlice';
 import NetworkStatusBar from './src/components/common/NetworkStatusBar';
 import NetInfo from "@react-native-community/netinfo";
+import Toast from 'react-native-toast-message'; // Import Toast
+import { NotificationServices, requestUserPermission } from './src/utils/pushNotifications';
 
 const AppWrapper = () => {
   const dispatch = useDispatch();
   const [isConnected, setIsConnected] = useState(true);
   console.log(isConnected)
+  useEffect(()=>{
+requestUserPermission();
+NotificationServices()
+  },[])
   useEffect(() => {
     const init = async () => {
       try {
@@ -42,6 +48,7 @@ const AppWrapper = () => {
     <View style={styles.container}>
       <NetworkStatusBar isConnected={isConnected} />
       <AppNavigator />
+      <Toast /> 
     </View>
   );
 };

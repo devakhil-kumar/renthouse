@@ -228,10 +228,11 @@ const UserTabNavigator = () => {
 
   return (
     <Tab.Navigator
-      tabBarOptions={{
-        activeTintColor: '#4a90e2',
-        inactiveTintColor: 'gray',
-      }}>
+      // tabBarOptions={{
+      //   activeTintColor: '#4a90e2',
+      //   inactiveTintColor: 'gray',
+      // }}
+      >
       <Tab.Screen
         name="Home"
         component={SearchStackScreen}

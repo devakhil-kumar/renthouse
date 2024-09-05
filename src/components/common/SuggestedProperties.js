@@ -14,21 +14,40 @@ const SuggestedProperties = () => {
   const dispatch = useDispatch();
   const { suggestedProperties, loading, error } = useSelector((state) => state.suggestedProperties);
   const theme = colorScheme === 'dark' ? darkTheme : lightTheme;
-
-  const suggestedProperty = suggestedProperties.map(property => ({
-    id: property._id,
-    image: property.mainImage || null,
-    rating: property.rating || 0,
-    title: property.title,
-    location: property.location?.address || 'Location not available',
-    area: property.squareFeet || 0,
-    baths: property.bathrooms || 0,
-    bedrooms: property.bedrooms || 0,
-    price: property.price || 0,
-    type: property.type || 'Not specified',
-    images: property.images,
-    reviews: property.reviews || []
-  }));
+console.log(suggestedProperties,"ggg")
+  const suggestedProperty = suggestedProperties.map(property => {
+    // Extract latitude and longitude from coordinates if available
+    const [latitude = null, longitude = null] = property.location?.coordinates || [];
+  
+    return {
+      id: property._id,
+      image: property.mainImage || null, // Use a default image if not provided
+      rating: property.rating || 0,
+      title: property.title,
+      description: property.description || "No description about the property",
+      location: property.location?.address || 'Location not available',
+      city: property.location?.city || 'City not available',
+      state: property.location?.state || 'State not available',
+      country: property.location?.country || 'Country not available',
+      latitude: latitude, // Extracted latitude
+      longitude: longitude, // Extracted longitude
+      features: property.features || [],
+      area: property.squareFeet || 0,
+      baths: property.bathrooms || 0,
+      bedrooms: property.bedrooms || 0,
+      price: property.price || 0,
+      type: property.type || 'Not specified',
+      images: property.images || [], // Use default if not provided
+      reviews: property.reviews || [], // Empty array if no reviews
+      category: property.category || "NA",
+      furnishedType: property.furnishedType || "null",
+      isGatedSociety: property.gatedSociety || false,
+      isPetFriendly: property.petFriendly || false,
+      preferredTenant: property.preferredTenant || 'Any',
+      availableDate: property.nextAvailableDate || null, // Use null if not provided
+      updatedDate: property.updatedAt || null, // Use null if not provided
+    };
+  });
 
   useEffect(() => {
     dispatch(fetchSuggestedProperties());

@@ -45,7 +45,8 @@ const styles = StyleSheet.create({
       borderWidth: 1,
       borderRadius: 5,
       overflow: 'hidden',
-      borderColor:"grey"
+      borderColor: "grey",
+      // height: 150, // Increase this value to show more items at once
     },
     picker: {
       height: 50,

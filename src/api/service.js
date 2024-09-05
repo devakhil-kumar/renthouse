@@ -16,6 +16,14 @@ import {
   getFeaturedPropertiesAPI,
   addFavoritePropertyAPI,
   getFavoritePropertiesAPI,
+  getUserDetail,
+  deleteFavoritePropertyAPI,
+  getFavoritePropertiesIDAPI,
+  createNotificationAPI,
+  getAgentNotificationsAPI,
+  markNotificationAsReadAPI,
+  getUnreadNotificationCountAPI,
+  getAgentPropertiesCountAPI
 } from './api'; // Adjust path based on your project structure
 
 export const loginService = async userData => {
@@ -78,7 +86,7 @@ export const getOTPService = async (email) => {
 
 export const getUserDetailService = async (ID) => {
   try {
-    const response = await addPropertyAPI(ID);
+    const response = await getUserDetail(ID);
     return response.data; // Assuming your API returns the added property data
   } catch (error) {
     throw new Error(error);
@@ -218,5 +226,75 @@ export const getFavoritePropertiesService = async (userId) => {
     return response.data; // Assuming your API returns the list of viewed properties
   } catch (error) {
     throw new Error('Fetching favorite properties failed. Please try again later.');
+  }
+};
+export const deleteFavoritePropertyService = async (userId, propertyId) => {
+  console.log(userId, propertyId)
+  try {
+    const response = await deleteFavoritePropertyAPI(userId, propertyId);
+    return response.data; // Assuming your API returns a success message or deleted property data
+  } catch (error) {
+    throw new Error('Deleting favorite property failed. Please try again later.');
+  }
+}
+
+export const getFavoritePropertiesIdService = async (userId) => {
+  try {
+    const response = await getFavoritePropertiesIDAPI(userId);
+    return response.data; // Assuming your API returns the list of viewed properties
+  } catch (error) {
+    throw new Error('Fetching favorite properties failed. Please try again later.');
+  }
+};
+
+
+
+
+
+
+export const createNotificationService = async (notificationData) => {
+  try {
+    const response = await createNotificationAPI(notificationData);
+    return response.data;
+  } catch (error) {
+    throw new Error('Creating notification failed. Please try again later.');
+  }
+};
+
+export const getAgentNotificationsService = async (agentId, status) => {
+  try {
+    const response = await getAgentNotificationsAPI(agentId, status);
+    return response.data;
+  } catch (error) {
+    throw new Error('Fetching agent notifications failed. Please try again later.');
+  }
+};
+
+export const markNotificationAsReadService = async (notificationId) => {
+  try {
+    const response = await markNotificationAsReadAPI(notificationId);
+    return response.data;
+  } catch (error) {
+    throw new Error('Marking notification as read failed. Please try again later.');
+  }
+};
+
+export const getUnreadNotificationCountService = async (agentId) => {
+  try {
+    const response = await getUnreadNotificationCountAPI(agentId);
+    return response.data;
+  } catch (error) {
+    throw new Error('Fetching unread notification count failed. Please try again later.');
+  }
+};
+
+
+export const getAgentPropertiesCountService = async (agentId) => {
+  try {
+    const response = await getAgentPropertiesCountAPI(agentId);
+    return response.data;
+  } catch (error) {
+    console.log(error)
+    throw new Error('Fetching agent properties count failed. Please try again later.');
   }
 };

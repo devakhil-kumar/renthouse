@@ -22,6 +22,7 @@ import AddPropertyStep1 from '../../screens/myProperty/AddPropertyStep1';
 import AddPropertyStep2 from '../../screens/myProperty/AddPropertyStep2';
 import SearchProperties from '../../screens/search/SearchProperties';
 import { logoutUser } from '../../features/authSlice';
+import AddressSearchScreen from '../../screens/myProperty/AddressSearchScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -123,6 +124,15 @@ const MyPropertyStackScreen = () => (
         headerTintColor: 'white',
       }}
     />
+     <MyPropertyStack.Screen
+      name="AddressScreen"
+      component={AddressSearchScreen}
+      options={{
+        headerTitle: 'Add Address',
+        headerStyle: {backgroundColor: '#4a90e2'},
+        headerTintColor: 'white',
+      }}
+    />
   </MyPropertyStack.Navigator>
 );
 
@@ -193,10 +203,11 @@ const TabNavigator = () => {
 
   return (
     <Tab.Navigator
-      tabBarOptions={{
-        activeTintColor: '#4a90e2',
-        inactiveTintColor: 'gray',
-      }}>
+      // tabBarOptions={{
+      //   activeTintColor: '#4a90e2',
+      //   inactiveTintColor: 'gray',
+      // }}
+      >
       {/* <Tab.Screen
         name="Home"
         component={SearchStackScreen}
@@ -224,7 +235,7 @@ const TabNavigator = () => {
     })(route),
   })}
 />
-      <Tab.Screen
+      {/* <Tab.Screen
         name="Collection"
         component={CollectionStackScreen}
         options={{
@@ -233,7 +244,7 @@ const TabNavigator = () => {
             <Icon name="bookmark-outline" size={size} color={color} />
           ),
         }}
-      />
+      /> */}
       <Tab.Screen
         name="MyProperty"
         component={MyPropertyStackScreen}
@@ -248,7 +259,8 @@ const TabNavigator = () => {
             if (
               routeName === 'ApartmentScreen' ||
               routeName === 'AddPropertyScreen' ||
-              routeName === 'AddPropertyScreen2'
+              routeName === 'AddPropertyScreen2'||
+              routeName === 'AddressScreen'
             ) {
               return {display: 'none'};
             }
