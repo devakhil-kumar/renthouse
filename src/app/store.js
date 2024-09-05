@@ -8,6 +8,7 @@ import featuredPropertyReducer from '../features/featuredPropertySlice';
 import recentSearchesReducer from '../features/recentSearchesSlice';
 import viewedPropertyReducer from '../features/viewedPropertySlice';
 import favoritePropertyReducer from '../features/favoritePropertySlice';
+import notificationReducer from '../features/notificationSlice';
 
 const store = configureStore({
   reducer: {
@@ -19,7 +20,8 @@ const store = configureStore({
     featuredProperties:featuredPropertyReducer,
     recentSearches:recentSearchesReducer,
     viewedProperties:viewedPropertyReducer,
-    favoriteProperties:favoritePropertyReducer
+    favoriteProperties:favoritePropertyReducer,
+    notifications:notificationReducer 
   },
 });
 

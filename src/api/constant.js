@@ -24,6 +24,13 @@ export const API_ROUTES = {
 
   ADD_FAVORITE_PROPERTY:'addfavoriteproperty',
   GET_FAVORITE_PROPERTIES:'getfavoriteproperties',
+  DELETE_FAVORITE_PROPERTIES:'deletefavproperty',
+  GET_FAVORITE_PROPERTIES_Id:'getfavpropertiesId',
+  CREATE_NOTIFICATION: '/notifications/create',
+  GET_AGENT_NOTIFICATIONS: '/notifications/agent',
+  MARK_NOTIFICATION_READ: '/notifications',
+  GET_UNREAD_NOTIFICATION_COUNT: '/notifications/agent',
+  GET_AGENT_PROPERTIES_COUNT: '/property/count',
 
 
   };
